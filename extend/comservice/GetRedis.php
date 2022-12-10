@@ -7,12 +7,13 @@
  */
 namespace comservice;
 use think\Config;
+use think\Env;
 
 class GetRedis
 {
     public static function getRedis()
     {
-        $redis = RedisCache::getInstance('127.0.0.1','654321');
+        $redis = RedisCache::getInstance(Env::get('redis.host', '127.0.0.1'),Env::get('redis.password', ''));
         $redis->selectDb(0);
         return $redis;
     }
