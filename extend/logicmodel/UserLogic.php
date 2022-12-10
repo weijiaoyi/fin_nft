@@ -4,14 +4,18 @@
 namespace logicmodel;
 
 
+use app\lib\exception\JWT;
 use comservice\GetRedis;
 use comservice\Response;
 use datamodel\Feedback;
 use datamodel\Users;
 use dh2y\qrcode\QRcode;
+use Elliptic\EC;
+use kornrunner\Keccak;
 use logicmodel\award\Award;
 use logicmodel\award\Recommend;
 use think\Db;
+use think\Env;
 use think\Request;
 
 class UserLogic
@@ -166,10 +170,12 @@ class UserLogic
         $app_token = uniqueNum();
         $redis = GetRedis::getRedis();
         $redis->setItem($app_token, $userInfo['id']);
-        $result = $this->usersData->updateByWhere(['id' => $userInfo['id']], ['app_token' => $app_token, 'login_time' => date('Y-m-d H:i:s')]);
+        $result = $this->usersData->updateByWhere(['id' => $userInfo['id']], ['token' => $app_token, 'login_time' => date('Y-m-d H:i:s')]);
         if ($result) return Response::success('登录成功', ['app_token' => $app_token]);
         return Response::fail('登录失败');
     }
+
+
 
     /**
      * 验证码登录
@@ -226,7 +232,7 @@ class UserLogic
         $redis = GetRedis::getRedis();
         $app_token = uniqueNum();
         $redis->setItem($app_token, $user_id);
-        $result = $this->usersData->updateByWhere(['id' => $user_id], ['app_token' => $app_token, 'login_time' => date('Y-m-d H:i:s')]);
+        $result = $this->usersData->updateByWhere(['id' => $user_id], ['token' => $app_token, 'login_time' => date('Y-m-d H:i:s')]);
         if ($result) return Response::success('登录成功', ['app_token' => $app_token]);
         return Response::fail('登录失败');
     }
@@ -577,7 +583,7 @@ class UserLogic
         $app_token = uniqueNum();
         $redis->setItem($app_token, $user_id);
         $result = $this->usersData->updateByWhere(['id' => $user_id], ['app_token' => $app_token, 'login_time' => date('Y-m-d H:i:s')]);
-        if ($result) return Response::success('登录成功', ['app_token' => $app_token]);
+        if ($result) return Response::success('登录成功', ['token' => $app_token]);
         return Response::fail('登录失败');
     }
 
@@ -616,6 +622,55 @@ class UserLogic
             $redis->setItem($token, $userInfo['id']);
             $this->usersData->updateByWhere(['id' => $userInfo['id']], ['app_token' => $token, 'login_time' => date('Y-m-d H:i:s')]);
         }
-        return Response::success('绑定成功', ['app_token' => $token]);
+        return Response::success('绑定成功', ['token' => $token]);
+    }
+
+    public function metaMaskLogin($address)
+    {
+        $userInfo = $this->usersData->where(['wallet_address' => $address])->find();
+        $nonce = uniqid();
+        if($userInfo){
+            if($userInfo['nonce']) {
+                $nonce = $userInfo['nonce'];
+            }else{
+                $this->usersData->where(['wallet_address' => $address])->update(['nonce'=>$nonce]);
+            }
+        }else{
+            $this->usersData->insert(['wallet_address' => $address,'nonce'=>$nonce,'create_time'=> date('Y-m-d H:i:s')]);
+        }
+        return Response::success('获取成功', ['nonce' => $nonce]);
+    }
+
+
+    public function mateMaskAuth($address,$signature){
+        $userInfo = $this->usersData->where(['wallet_address' => $address])->find();
+        $message = $userInfo['nonce'];
+        if ($this->verifySignature($message, $signature, $address)) {
+            $nonce = uniqid();
+            $token = array();
+            $token['address'] = $address;
+            $JWT = JWT::encode($token, Env::get('jws.secret', '123456'));
+            $redis = GetRedis::getRedis();
+            $redis->setItem($JWT, $userInfo['id']);
+            $this->usersData->updateByWhere(['id' => $userInfo['id']], ['app_token' => $JWT,'nonce'=>$nonce, 'login_time' => date('Y-m-d H:i:s')]);
+            return Response::success('授权成功', ['token' => $JWT]);
+        } else {
+            return Response::fail('授权失败');
+        }
+
+    }
+
+    private function verifySignature($message, $signature, $address)
+    {
+        $msglen = strlen($message);
+        $hash   = Keccak::hash("\x19Ethereum Signed Message:\n{$msglen}{$message}", 256);
+        $sign   = ["r" => substr($signature, 2, 64),
+            "s" => substr($signature, 66, 64)];
+        $recid  = ord(hex2bin(substr($signature, 130, 2))) - 27;
+        if ($recid != ($recid & 1))
+            return false;
+        $ec = new EC('secp256k1');
+        $pubkey = $ec->recoverPubKey($hash, $sign, $recid);
+        return $address == pubKeyToAddress($pubkey);
     }
 }

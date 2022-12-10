@@ -39,6 +39,27 @@ class Login extends Controller
     }
 
     /**
+     * 登录获取nonce
+     * @param $address
+     * @return \think\response\Json
+     */
+    public function metaMaskLogin($address)
+    {
+        return json($this->userLogic->metaMaskLogin($address));
+    }
+
+    /**
+     * 授权
+     * @param $address
+     * @param $signature
+     * @return \think\response\Json
+     */
+    public function mateMaskAuth($address,$signature)
+    {
+        return json($this->userLogic->mateMaskAuth($address,$signature));
+    }
+
+    /**
      * 验证码登录
      * @param $phone
      * @param $code
