@@ -13,7 +13,7 @@ namespace app\lib\exception;
  * @license  http://opensource.org/licenses/BSD-3-Clause 3-clause BSD
  * @link     https://github.com/firebase/php-jwt
  */
-class JWT
+class Jwt
 {
 	/**
 	 * Decodes a JWT string into a PHP object.

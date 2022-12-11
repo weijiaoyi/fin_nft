@@ -4,7 +4,7 @@
 namespace logicmodel;
 
 
-use app\lib\exception\JWT;
+use app\lib\exception\Jwt;
 use comservice\GetRedis;
 use comservice\Response;
 use datamodel\Feedback;
@@ -12,7 +12,6 @@ use datamodel\Users;
 use dh2y\qrcode\QRcode;
 use Elliptic\EC;
 use kornrunner\Keccak;
-use logicmodel\award\Award;
 use logicmodel\award\Recommend;
 use think\Db;
 use think\Env;
@@ -649,11 +648,11 @@ class UserLogic
             $nonce = uniqid();
             $token = array();
             $token['address'] = $address;
-            $JWT = JWT::encode($token, Env::get('jws.secret', '123456'));
+            $jwt = Jwt::encode($token, Env::get('jws.secret', '123456'));
             $redis = GetRedis::getRedis();
-            $redis->setItem($JWT, $userInfo['id']);
-            $this->usersData->updateByWhere(['id' => $userInfo['id']], ['app_token' => $JWT,'nonce'=>$nonce, 'login_time' => date('Y-m-d H:i:s')]);
-            return Response::success('授权成功', ['token' => $JWT]);
+            $redis->setItem($jwt, $userInfo['id']);
+            $this->usersData->updateByWhere(['id' => $userInfo['id']], ['app_token' => $jwt,'nonce'=>$nonce, 'login_time' => date('Y-m-d H:i:s')]);
+            return Response::success('授权成功', ['token' => $jwt]);
         } else {
             return Response::fail('授权失败');
         }
@@ -671,6 +670,11 @@ class UserLogic
             return false;
         $ec = new EC('secp256k1');
         $pubkey = $ec->recoverPubKey($hash, $sign, $recid);
-        return $address == pubKeyToAddress($pubkey);
+        return $address == $this->pubKeyToAddress($pubkey);
     }
+
+    private function pubKeyToAddress($pubkey) {
+        return "0x" . substr(Keccak::hash(substr(hex2bin($pubkey->encode("hex")), 1), 256), 24);
+    }
+
 }
