@@ -169,7 +169,7 @@ class UserLogic
         $app_token = uniqueNum();
         $redis = GetRedis::getRedis();
         $redis->setItem($app_token, $userInfo['id']);
-        $result = $this->usersData->updateByWhere(['id' => $userInfo['id']], ['token' => $app_token, 'login_time' => date('Y-m-d H:i:s')]);
+        $result = $this->usersData->updateByWhere(['id' => $userInfo['id']], ['app_token' => $app_token, 'login_time' => date('Y-m-d H:i:s')]);
         if ($result) return Response::success('登录成功', ['app_token' => $app_token]);
         return Response::fail('登录失败');
     }
@@ -231,7 +231,7 @@ class UserLogic
         $redis = GetRedis::getRedis();
         $app_token = uniqueNum();
         $redis->setItem($app_token, $user_id);
-        $result = $this->usersData->updateByWhere(['id' => $user_id], ['token' => $app_token, 'login_time' => date('Y-m-d H:i:s')]);
+        $result = $this->usersData->updateByWhere(['id' => $user_id], ['app_token' => $app_token, 'login_time' => date('Y-m-d H:i:s')]);
         if ($result) return Response::success('登录成功', ['app_token' => $app_token]);
         return Response::fail('登录失败');
     }
@@ -582,7 +582,7 @@ class UserLogic
         $app_token = uniqueNum();
         $redis->setItem($app_token, $user_id);
         $result = $this->usersData->updateByWhere(['id' => $user_id], ['app_token' => $app_token, 'login_time' => date('Y-m-d H:i:s')]);
-        if ($result) return Response::success('登录成功', ['token' => $app_token]);
+        if ($result) return Response::success('登录成功', ['app_token' => $app_token]);
         return Response::fail('登录失败');
     }
 
@@ -621,7 +621,7 @@ class UserLogic
             $redis->setItem($token, $userInfo['id']);
             $this->usersData->updateByWhere(['id' => $userInfo['id']], ['app_token' => $token, 'login_time' => date('Y-m-d H:i:s')]);
         }
-        return Response::success('绑定成功', ['token' => $token]);
+        return Response::success('绑定成功', ['app_token' => $token]);
     }
 
     public function metaMaskLogin($address)
@@ -652,7 +652,7 @@ class UserLogic
             $redis = GetRedis::getRedis();
             $redis->setItem($jwt, $userInfo['id']);
             $this->usersData->updateByWhere(['id' => $userInfo['id']], ['app_token' => $jwt,'nonce'=>$nonce, 'login_time' => date('Y-m-d H:i:s')]);
-            return Response::success('授权成功', ['token' => $jwt]);
+            return Response::success('授权成功', ['app_token' => $jwt]);
         } else {
             return Response::fail('授权失败');
         }
