@@ -8,13 +8,13 @@ use think\Model;
 class Goods extends Model
 {
 
-    
 
-    
+
+
 
     // 表名
     protected $name = 'goods';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
 
@@ -28,9 +28,9 @@ class Goods extends Model
         'type_text',
         'is_show_text',
     ];
-    
 
-    
+
+
     public function getTypeList()
     {
         return ['1' => __('Type 1'), '2' => __('Type 2')];
@@ -84,6 +84,7 @@ class Goods extends Model
     {
         return $this->belongsTo('Coupon', 'coupon_id', 'id', [], 'LEFT')->setEagerlyType(0);
     }
+
     public function goodscategory()
     {
         return $this->belongsTo('GoodsCategory', 'goods_category_id', 'id', [], 'LEFT')->setEagerlyType(0);

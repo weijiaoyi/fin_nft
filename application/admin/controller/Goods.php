@@ -96,6 +96,14 @@ class Goods extends Backend
         return json(['code' => 0, 'msg' => '删除失败']);
     }
 
+    public function level2(){
+       // {"1":'Lv.1',"2":'Lv.2',"3":'Lv.3',"4":'Lv.4',"5":'Lv.5',"6":'Lv.6',"7":'Lv.7'}
+    }
+    public function level(){
+        $level=[1=>'Lv.1',2=>'Lv.2',3=>'Lv.3',4=>'Lv.4',5=>'Lv.5',6=>'Lv.6',7=>'Lv.7'];
+        return json($level);
+    }
+
     public function list()
     {
         return json($this->model->where(['is_del' => 0])->select());

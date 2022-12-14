@@ -28,9 +28,9 @@ class Goods extends Controller
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function goodsList($search='',$goods_category_id='',$page=1,$pagesize=10){
+    public function goodsList($search='',$is_chip=-1,$page=1,$pagesize=10){
 
-        return json($this->goodsLogic->goodsList($search,$goods_category_id,$page,$pagesize));
+        return json($this->goodsLogic->goodsList($search,$is_chip,$page,$pagesize));
     }
 
     /**
