@@ -90,4 +90,9 @@ class Goods extends Model
         return $this->belongsTo('GoodsCategory', 'goods_category_id', 'id', [], 'LEFT')->setEagerlyType(0);
     }
 
+    public function goodsrank()
+    {
+        return $this->belongsTo('GoodsRank', 'level', 'id', [], 'LEFT')->setEagerlyType(0);
+    }
+
 }

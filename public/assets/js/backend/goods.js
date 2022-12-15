@@ -31,15 +31,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {checkbox: true},
                         {field: 'id', title: __('Id'), operate: false},
                         {field: 'name', title: __('Name'), operate: 'LIKE'},
+                        {field: 'goodsrank.name', title: '等级', operate: false},
+                        {field: 'level', title: '等级', visible:false,searchList:$.getJSON('goods/rank')},
                         {field: 'is_can_buy', title: '是否参与买卖', searchList: {"0":'不参与',"1":'参与'}, formatter: Table.api.formatter.normal},
                         {field: 'is_chip', title: '是否是碎片', searchList: {"0":'否',"1":'是'}, formatter: Table.api.formatter.normal},
-                       // {field: 'is_manghe', title: '是否是盲盒', searchList: {"0":'藏品',"1":'盲盒'}, formatter: Table.api.formatter.normal},
-                        {field: 'goodscategory.name', title: __('Goodscategory.name'), operate: false},
-                        {field: 'goods_category_id', title: __('Goodscategory.name'), visible:false,searchList:$.getJSON('goods_category/list')},
+                        {field: 'is_manghe', title: '是否是盲盒', searchList: {"0":'藏品',"1":'盲盒'}, formatter: Table.api.formatter.normal},
+                       // {field: 'goodscategory.name', title: __('Goodscategory.name'), operate: false},
+                        //{field: 'goods_category_id', title: __('Goodscategory.name'), visible:false,searchList:$.getJSON('goods_category/list')},
                         {field: 'image', title: __('Image'), operate: false, events: Table.api.events.image, formatter: Table.api.formatter.image},
                         {field: 'price', title: __('Price'), operate:false},
-                        {field: 'type', title: __('Type'), searchList: {"1":__('Type 1'),"2":__('Type 2')}, formatter: Table.api.formatter.normal},
-                        {field: 'level', title: '等级', searchList:$.getJSON('goods/level'), formatter: Table.api.formatter.normal},
+                        //{field: 'type', title: __('Type'), searchList: {"1":__('Type 1'),"2":__('Type 2')}, formatter: Table.api.formatter.normal},
+
                         {field: 'order', title: __('Order'), operate: false},
                         {field: 'start_time', title: __('Start_time'), operate:'RANGE', addclass:'datetimerange', autocomplete:false},
                         {field: 'stock', title: __('Stock'), operate:false},
@@ -59,7 +61,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     url: 'goods/zhuzao',
                                     visible:function(row){
                                         if( ! row.blockchain){
-                                            return true; //或者return false
+                                            return false; //或者return false
                                         }
                                     },
                                     callback: function (data) {

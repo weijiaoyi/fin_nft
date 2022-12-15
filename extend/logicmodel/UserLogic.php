@@ -166,11 +166,11 @@ class UserLogic
         if (empty($userInfo)) return Response::fail('手机号未注册');
         if ($userInfo['status'] == 0) return Response::fail('账号已冻结');
         if (md5(md5($password) . $userInfo['salt']) != $userInfo['password']) return Response::fail('密码错误');
-        $app_token = uniqueNum();
+        $jwt = Jwt::encode(['id'=>$userInfo['id'],'member'=>$userInfo['member']], Env::get('jws.secret', '123456'));
         $redis = GetRedis::getRedis();
-        $redis->setItem($app_token, $userInfo['id']);
-        $result = $this->usersData->updateByWhere(['id' => $userInfo['id']], ['app_token' => $app_token, 'login_time' => date('Y-m-d H:i:s')]);
-        if ($result) return Response::success('登录成功', ['app_token' => $app_token]);
+        $redis->setItem($jwt, $userInfo['id']);
+        $result = $this->usersData->updateByWhere(['id' => $userInfo['id']], ['app_token' => $jwt, 'login_time' => date('Y-m-d H:i:s')]);
+        if ($result) return Response::success('登录成功', ['app_token' => $jwt]);
         return Response::fail('登录失败');
     }
 

@@ -73,13 +73,12 @@ class GoodsLogic
         $where['g.is_show'] = 1;
         $where['g.is_manghe'] = 0; //非盲盒
         $where['g.is_can_buy'] = 1; //可以参与购买
-        $where['g.is_chip'] = 0; //不是碎片
         if (!empty($search)) $where['g.name|g.label'] = ['like', '%' . $search . '%'];
         $count = $this->goodsData->alias('g')->where($where)->count();
         if ($count <= 0) return Response::success('暂无数据', ['count' => $count, 'data' => [], 'page' => $page, 'pagesize' => $pagesize]);
-        $field = ['g.*', 'gc.name goods_category_name'];
+        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.is_chip,gr.image';
         $data = $this->goodsData->alias('g')
-            ->join('goods_category gc', 'gc.id = g.goods_category_id')
+            ->join('goods_rank gr', 'g.level = gr.id','LEFT')
             ->where($where)
             ->field($field)
             ->order(['g.order asc', 'g.start_time asc'])
@@ -87,20 +86,20 @@ class GoodsLogic
             ->select();
         if ($data) {
             $data = collection($data)->toArray();
-            $data = addWebSiteUrl($data, ['image', 'company_image']);
+            $data = addWebSiteUrl($data, ['image']);
             $time = date('Y-m-d H:i:s');
-            foreach ($data as $k => $v) {
+            foreach ($data as &$v) {
                 if ($time >= $v['start_time'] && $time <= $v['end_time']) {
-                    $data[$k]['status'] = 1;
+                    $v['status'] = 1;
                 } elseif ($v['start_time'] >= $time) {
-                    $data[$k]['status'] = 2;
+                    $v['status'] = 2;
                 } else {
-                    $data[$k]['status'] = 3;
+                    $v['status'] = 3;
                 }
                 $start_time = date('Y-m-d H:i', strtotime($v['start_time']));
                 $end_time = date('Y-m-d H:i', strtotime($v['end_time']));
-                $data[$k]['start_time'] = $start_time;
-                $data[$k]['end_time'] = $end_time;
+                $v['start_time'] = $start_time;
+                $v['end_time'] = $end_time;
             }
             return Response::success('success', ['count' => $count, 'data' => $data, 'page' => $page, 'pagesize' => $pagesize]);
         }
@@ -120,42 +119,15 @@ class GoodsLogic
     {
         $where['g.id'] = $id;
         $where['g.is_del'] = 0;
+        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.is_chip,gr.image';
         $data = $this->goodsData->alias('g')
-            ->join('goods_category gc', 'gc.id = g.goods_category_id')
+            ->join('goods_rank gr', 'g.level = gr.id','LEFT')
             ->where($where)
-            ->field(['g.*', 'gc.name goods_category_name'])
+            ->field($field)
             ->find();
         if ($data) {
             $data = $data->toArray();
-            $data = addWebSiteUrl($data, ['image', 'images', 'company_image']);
-//            $data['content'] = content($data['content']);
-            if ($data['type'] == 2) {
-                //多品组合
-                $goods = $this->goodsConfigData->alias('gc')
-                    ->join('goods g', 'g.id = gc.combination_goods_id')
-                    ->where(['gc.is_del' => 0, 'gc.is_show' => 1, 'gc.goods_id' => $id])
-                    ->field(['gc.surplus', 'g.image', 'g.price', 'g.name', 'g.coupon_id', 'g.label'])
-                    ->select();
-                if (!empty($goods)) {
-                    $goods = collection($goods)->toArray();
-                    $goods = addWebSiteUrl($goods, ['image']);
-                    $couponData = new Coupon();
-                    foreach ($goods as $k => &$v) {
-                        $coupon_id = $v['coupon_id'];
-                        if ($coupon_id > 0) {
-                            $goods[$k]['coupon'] = $couponData->find($coupon_id)->toArray();
-                        } else {
-                            $goods[$k]['coupon'] = [];
-                        }
-                    }
-                    $data['goods'] = $goods;
-                    $data['goods_count'] = count($goods);
-                } else {
-                    $data['goods'] = [];
-                    $data['goods_count'] = 0;
-                }
-            }
-            date('Y-m-d H:i', strtotime($data['start_time']));
+            $data = addWebSiteUrl($data, ['image']);
             $start_time = date('Y-m-d H:i', strtotime($data['start_time']));
             $end_time = date('Y-m-d H:i', strtotime($data['end_time']));
             $data['start_time'] = $start_time;

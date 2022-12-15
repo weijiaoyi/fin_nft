@@ -5,13 +5,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 初始化表格参数配置
             Table.api.init({
                 extend: {
-                    index_url: 'rank/index' + location.search,
-                    add_url: 'rank/add',
-                    edit_url: 'rank/edit',
-                    del_url: 'rank/del',
-                    multi_url: 'rank/multi',
-                    import_url: 'rank/import',
-                    table: 'rank',
+                    index_url: 'goods_rank/index' + location.search,
+                    add_url: 'goods_rank/add',
+                    edit_url: 'goods_rank/edit',
+                    del_url: 'goods_rank/del',
+                    multi_url: 'goods_rank/multi',
+                    import_url: 'goods_rank/import',
+                    table: 'goods_rank',
                 }
             });
 
@@ -25,13 +25,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {checkbox: true},
-                       // {field: 'id', title: __('Id')},
                         {field: 'name', title: __('Name'), operate: 'LIKE'},
-                        //{field: 'image', title: __('Image'), operate: false, events: Table.api.events.image, formatter: Table.api.formatter.image},
-                        {field: 'remittance_money', title:'消费金额', operate:'BETWEEN'},
-                       // {field: 'buy_number', title: __('Buy_number')},
-                       // {field: 'total_direct', title: __('Total_direct')},
-                        {field: 'desc', title: __('Desc'), operate: 'LIKE'},
+                        {field: 'image', title: '图片', operate: false, events: Table.api.events.image, formatter: Table.api.formatter.image},
+                        {field: 'desc', title: '描述', operate: 'LIKE'},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
                 ]
