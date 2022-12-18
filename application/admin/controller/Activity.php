@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\User;
 use app\common\controller\Backend;
 use fast\Tree;
 use logicmodel\HaixiaLogic;
@@ -67,7 +68,7 @@ class Activity extends Backend
                 ->order($sort, $order)
                 ->paginate($limit);
 
-            foreach ($list as $row) {
+            foreach ($list as &$row) {
                 $row->visible(['id', 'title', 'image',  'bonus', 'status', 'participants', 'probability', 'start_time', 'end_time','status_text']);
                 $row->visible(['goods']);
                 $row->getRelation('goods')->visible(['name']);
@@ -88,6 +89,7 @@ class Activity extends Backend
 
     public function goods(){
         $where['g.is_del'] = 0;
+        $where['g.is_manghe'] = 1;
         $where['g.is_show'] = 1;
         $list = \app\admin\model\Goods::alias('g')
             ->join('goods_rank gr', 'g.level = gr.id','LEFT')
@@ -266,6 +268,17 @@ class Activity extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+                    if(empty($params['end_time'])){
+                        $end_time = strtotime($params['start_time'])+86400;
+                        $params['end_time'] = date('Y-m-d H:i:s',$end_time);
+                    }
+                    if(!empty($params['winne'])){
+                        $user = \app\admin\model\Users::find($params['winne']);
+                        if(!$user) {
+                            Db::rollback();
+                            $this->error('设置的中奖人不存在');
+                        }
+                    }
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -316,6 +329,13 @@ class Activity extends Backend
                         $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
+                    }
+                    if(!empty($params['winne'])){
+                        $user = \app\admin\model\Users::find($params['winne']);
+                        if(!$user) {
+                            Db::rollback();
+                            $this->error('设置的中奖人不存在');
+                        }
                     }
                     $result = $row->allowField(true)->save($params);
                     Db::commit();

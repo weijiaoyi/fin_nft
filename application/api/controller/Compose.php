@@ -39,7 +39,8 @@ class Compose extends BaseController
         $where['c.user_id'] = $this->uid;
         $where['g.is_can_buy'] = 1;
         $where['g.is_manghe'] = 0;
-        $data = $chipUsersModel->alias('c')->join('goods g', 'g.id=c.goods_id')
+        $data = $chipUsersModel->alias('c')
+            ->join('goods g', 'g.id=c.goods_id')
             ->field('c.*, g.name, g.image, g.price')
             ->where($where)
             ->select();

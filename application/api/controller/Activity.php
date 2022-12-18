@@ -3,9 +3,9 @@
 
 namespace app\api\controller;
 
-use comservice\Response;
-use think\Request;
+
 use app\admin\model\Activity as ActivityModel;
+use app\admin\model\ActivityUser;
 
 
 class Activity extends BaseController
@@ -28,6 +28,20 @@ class Activity extends BaseController
         return json(ActivityModel::details($id));
     }
 
+    /**
+     * 参加活动
+     * @param $id
+     * @return string
+     */
+    public function joinIn($id){
+        return json(ActivityUser::joinIn($id,$this->uid));
+    }
 
-
+    /**
+     * 开奖
+     * @return mixed
+     */
+    public function lottery(){
+        return json(ActivityModel::lottery());
+    }
 }

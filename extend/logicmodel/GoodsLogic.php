@@ -76,7 +76,7 @@ class GoodsLogic
         if (!empty($search)) $where['g.name|g.label'] = ['like', '%' . $search . '%'];
         $count = $this->goodsData->alias('g')->where($where)->count();
         if ($count <= 0) return Response::success('暂无数据', ['count' => $count, 'data' => [], 'page' => $page, 'pagesize' => $pagesize]);
-        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.is_chip,gr.image';
+        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.is_chip,gr.image,g.image as image_chip';
         $data = $this->goodsData->alias('g')
             ->join('goods_rank gr', 'g.level = gr.id','LEFT')
             ->where($where)
@@ -86,9 +86,12 @@ class GoodsLogic
             ->select();
         if ($data) {
             $data = collection($data)->toArray();
-            $data = addWebSiteUrl($data, ['image']);
+            $data = addWebSiteUrl($data, ['image','image_chip']);
             $time = date('Y-m-d H:i:s');
             foreach ($data as &$v) {
+                if($v['is_chip']==1){
+                    $v['image'] = $v['image_chip'];
+                }
                 if ($time >= $v['start_time'] && $time <= $v['end_time']) {
                     $v['status'] = 1;
                 } elseif ($v['start_time'] >= $time) {
@@ -119,7 +122,7 @@ class GoodsLogic
     {
         $where['g.id'] = $id;
         $where['g.is_del'] = 0;
-        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.is_chip,gr.image';
+        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.is_chip,gr.image,g.image as image_chip';
         $data = $this->goodsData->alias('g')
             ->join('goods_rank gr', 'g.level = gr.id','LEFT')
             ->where($where)
@@ -127,7 +130,10 @@ class GoodsLogic
             ->find();
         if ($data) {
             $data = $data->toArray();
-            $data = addWebSiteUrl($data, ['image']);
+            $data = addWebSiteUrl($data, ['image','image_chip']);
+            if($data['is_chip']==1){
+                $data['image'] = $data['image_chip'];
+            }
             $start_time = date('Y-m-d H:i', strtotime($data['start_time']));
             $end_time = date('Y-m-d H:i', strtotime($data['end_time']));
             $data['start_time'] = $start_time;

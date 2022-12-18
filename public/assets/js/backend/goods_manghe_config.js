@@ -49,6 +49,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }
                             return '不展示';
                         }},
+                        {field: 'is_special', title: '特定奖品', searchList: {"0":'否',"1":'是'}, formatter: Table.api.formatter.normal},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
                 ]

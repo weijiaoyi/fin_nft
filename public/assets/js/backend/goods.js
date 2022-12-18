@@ -47,7 +47,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'stock', title: __('Stock'), operate:false},
                         {field: 'sales', title: __('Sales'), operate:false},
                         {field: 'surplus', title: __('Surplus'), operate:false},
-                        {field: 'label', title: __('Label'), operate:'LIKE'},
+                        //{field: 'label', title: __('Label'), operate:'LIKE'},
                         {field: 'is_show', title: __('Is_show'), searchList: {"0":__('Is_show 0'),"1":__('Is_show 1')}, formatter: Table.api.formatter.normal},
                         {field: 'owner', title: '所属人', operate:false},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,

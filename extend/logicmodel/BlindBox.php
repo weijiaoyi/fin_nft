@@ -4,12 +4,18 @@
 namespace logicmodel;
 
 
+use app\admin\model\GoodsMangheConfig;
+use app\admin\model\GoodsMangheUsers;
+use app\admin\model\MangheAwardRecord;
 use app\common\model\Config;
 use comservice\GetRedis;
+use comservice\Response;
 use datamodel\Goods;
 use datamodel\GoodsConfig;
 use datamodel\GoodsTransfer;
+use datamodel\GoodsUsers;
 use datamodel\Orders;
+use think\Db;
 
 class BlindBox
 {
@@ -215,6 +221,7 @@ class BlindBox
         $repeat_arr = array_diff_assoc ( $array, $unique_arr );
         return $repeat_arr;
     }
+
 
 
 }

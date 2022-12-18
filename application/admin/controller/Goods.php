@@ -92,6 +92,7 @@ class Goods extends Backend
         return $this->view->fetch();
     }
 
+
     public function del($ids = "")
     {
         $result = $this->model->where(['id' => ['in', $ids]])->update(['is_del' => 1]);
@@ -197,6 +198,7 @@ class Goods extends Backend
         //是否返回树形结构
         $istree = $this->request->request("isTree", 0);
         $ishtml = $this->request->request("isHtml", 0);
+        $is_manghe = $this->request->request("is_manghe", 0);
         if ($istree) {
             $word = [];
             $pagesize = 999999;
@@ -244,7 +246,11 @@ class Goods extends Backend
             $this->model->where($this->dataLimitField, 'in', $adminIds);
         }
         $list = [];
-        $total = $this->model->where($where)->count();
+        $manghe['is_manghe'] = ['in',[0,1]];
+        if($is_manghe){
+            $manghe['is_manghe'] = 1;
+        }
+        $total = $this->model->where($where)->where($manghe)->count();
         if ($total > 0) {
             if (is_array($adminIds)) {
                 $this->model->where($this->dataLimitField, 'in', $adminIds);
@@ -267,7 +273,7 @@ class Goods extends Backend
                 $this->model->order($order);
             }
 
-            $datalist = $this->model->where($where)->where(['is_del' => 0])
+            $datalist = $this->model->where($where)->where($manghe)->where(['is_del' => 0])
                 ->page($page, $pagesize)
                 ->select();
 
