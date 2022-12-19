@@ -328,9 +328,7 @@ class GoodsLogic
                     Db::rollback();
                     return Response::fail('订单支付失败');
                 }
-
                 $goods_user_number = $goodsUsersData->where(['goods_id' => $info['goods_id']])->whereNotNull('number')->order('id', 'desc')->value('number');
-
                 if ($goods_user_number) {
                     $goods_user_number = str_pad($goods_user_number + 1, 6, '0', STR_PAD_LEFT);
                 } else {

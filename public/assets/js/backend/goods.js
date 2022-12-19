@@ -103,6 +103,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         $(".btn-refresh").trigger("click");
                                     }
 
+                                },  {
+                                    dropdown:'更多',
+                                    name: '盲盒次数设置',
+                                    text: '盲盒参与次数设置',
+                                    title: '盲盒参与次数设置',
+                                    classname: 'btn  btn-success btn-dialog',
+                                    url: function (row) {
+                                        return 'goods_manghe_number/index?goods_id='+row.id;
+                                    },
+                                    visible:function(row){
+                                        if(row.is_manghe == 1){
+                                            return true; //或者return false
+                                        }
+                                    },
+                                    callback: function (data) {
+                                        $(".btn-refresh").trigger("click");
+                                    }
+
                                 },
                             ]
                         }

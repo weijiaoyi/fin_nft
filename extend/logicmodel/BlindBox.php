@@ -5,6 +5,7 @@ namespace logicmodel;
 
 
 use app\admin\model\GoodsMangheConfig;
+use app\admin\model\GoodsMangheNumber;
 use app\admin\model\GoodsMangheUsers;
 use app\admin\model\MangheAwardRecord;
 use app\common\model\Config;
@@ -22,6 +23,7 @@ class BlindBox
     private $goodsData;
     private $ordersData;
     private $goodsConfigData;
+    private $goodsConfigNumber;
     private $goodsTransfer;
     private $redis;
     /** @var AccountLogic @accountLogic */
@@ -32,6 +34,7 @@ class BlindBox
         $this->goodsData = new Goods();
         $this->ordersData = new Orders();
         $this->goodsConfigData = new GoodsConfig();
+        $this->goodsConfigNumber = new GoodsMangheNumber();
         $this->goodsTransfer = new GoodsTransfer();
         $this->redis = GetRedis::getRedis();
         $this->config = new Config();
@@ -222,6 +225,187 @@ class BlindBox
         return $repeat_arr;
     }
 
+    /**
+     * 列表
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function blindBoxList()
+    {
+        $time = date('Y-m-d H:i:s');
+        $where['g.is_del'] = 0;
+        $where['g.is_show'] = 1;
+        $where['g.is_manghe'] = 1; //非盲盒
+        $where['g.is_can_buy'] = 1; //可以参与购买
+        $where['g.start_time'] = ['lt',$time];
+        $where['g.end_time'] = ['gt',$time];
+        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.image';
+        $data = $this->goodsData->alias('g')
+            ->where($where)
+            ->field($field)
+            ->order(['g.order asc', 'g.start_time asc'])
+            ->select();
+        if ($data) {
+            $data = collection($data)->toArray();
+            $data = addWebSiteUrl($data, ['image']);
+            return Response::success('success', $data);
+        }
+        return Response::success('success', $data);
+    }
 
+    /**
+     * 详情
+     * @param $id
+     * @return array
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function details($id)
+    {
+        $time = date('Y-m-d H:i:s');
+        $where['is_del'] = $id;
+        $where['is_del'] = 0;
+        $where['is_show'] = 1;
+        $where['is_manghe'] = 1; //非盲盒
+        $where['is_can_buy'] = 1; //可以参与购买
+        $where['start_time'] = ['lt',$time];
+        $where['end_time'] = ['gt',$time];
+        $field = 'id,name,price,image';
+        $data = $this->goodsData->alias('g')
+            ->where($where)
+            ->field($field)
+            ->order(['order asc', 'start_time asc'])
+            ->find();
+        if ($data) {
+            $data = $data->toArray();
+            $data = addWebSiteUrl($data, ['image']);
+            $data['number'] = GoodsMangheNumber::where('goods_id',$id)->select();
+            return Response::success('success', $data);
+        }
+        return Response::fail('盲盒不存在');
+    }
+
+
+    public function openBlindBox($goods_id,$number,$userInfo,$pay_password)
+    {
+        $info = $this->goodsData->find($goods_id);
+        if(!$info){
+            return Response::fail('盲盒不存在');
+        }
+        $n_info = $this->goodsConfigNumber->where(['number'=>$number,'goods_id'=>$goods_id])->find();
+        if(!$n_info){
+            return Response::fail('盲盒抽取次数有误');
+        }
+        $password = md5(md5($pay_password) . $userInfo['pay_salt']);
+        if(empty($userInfo['pay_password'])){
+            //return Response::fail('请先设置支付密码');
+        }
+        if($password!=$userInfo['pay_password']){
+            //return Response::fail('支付密码错误');
+        }
+        $uid = $userInfo['id'];
+        $price = $n_info['amount'];
+        $number = $n_info['number'];
+        $gift_times = $n_info['gift_times'];//赠送次数
+        $number = $gift_times ? $number+$gift_times : $number;
+        $time = date('Y-m-d H:i:s');
+        Db::startTrans();
+        $accountLogic = new AccountLogic();
+        $result = $accountLogic->subAccount($uid, 1, $price, '购买盲盒', '购买盲盒');
+        if (!$result) {
+            Db::rollback();
+            return Response::fail('余额不足');
+        }
+        //生成拍品信息，生成订单
+        $order_num = uniqueNum();
+        $order['goods_users_id'] = $uid;
+        $order['goods_manghe_users_id'] = $uid;
+        $order['order_num'] = $order_num;
+        $order['goods_num'] = $number;
+        $order['goods_id'] = $goods_id;
+        $order['sale_uid'] = 1;
+        $order['buy_uid'] = $uid;
+        $order['price'] = $price;
+        $order['status'] = 1;
+        $order['create_time'] = $time;
+        $order['pay_end_time'] = $time;
+        $order['pay_time'] = $time;
+        $order['goods_config_id'] = 0;
+        $order['status'] = 2;
+        $order['pay_type'] = 1;
+        $order['buy_goods_id'] = $goods_id;
+        $order['order_type'] = 3;
+        $result = $this->ordersData->insertGetId($order);
+        if ($result) {
+            $goodsMangheConfigModel = new GoodsMangheConfig();
+            $goodsUsersData = new GoodsUsers();
+            $mangheAwardRecord = new MangheAwardRecord();
+            $winRecordDataArr = [];
+            $usersGoodsArr = [];
+            $winInfoArr = [];
+            for($i=0;$i<$number;$i++) {
+                $goodsMangheList = $goodsMangheConfigModel->alias('c')
+                    ->join('goods g', 'g.id = c.combination_goods_id')
+                    ->field(['c.*', 'g.name goods_name', 'g.image goods_image', 'g.price'])
+                    ->where(['goods_id' => $goods_id])
+                    ->select();
+                if ($goodsMangheList) {
+                    $goodsMangheList = collection($goodsMangheList)->toArray();
+                    $arrJiangxiang = array_column($goodsMangheList, 'win_rate', 'combination_goods_id');
+                    $win_id = getWinRand($arrJiangxiang);
+                    $winInfo = [];
+                    foreach ($goodsMangheList as $item) {
+                        if ($item['combination_goods_id'] == $win_id) {
+                            $winInfo = $item;
+                            $winInfoArr[]=$winInfo;
+                            break;
+                        }
+                    }
+                    if($winInfo) {
+                        //添加记录到
+                        $winRecordData = [];
+                        $winRecordData['user_id'] = $uid;
+                        $winRecordData['goods_id'] = $winInfo['combination_goods_id'];
+                        $winRecordData['status'] = $winInfo['is_win'] ? 1 : 0;
+                        $winRecordData['createtime'] = time();
+                        $winRecordDataArr[]=$winRecordData;
+                        $goods_user_number = $goodsUsersData->where(['goods_id' => $winInfo['combination_goods_id']])->whereNotNull('number')->order('id', 'desc')->value('number');
+                        if ($goods_user_number) {
+                            $goods_user_number = str_pad($goods_user_number + 1, 6, '0', STR_PAD_LEFT);
+                        } else {
+                            $goods_user_number = '000001';
+                        }
+                        $goods_number = uniqueNum();
+                        $usersGoods=[];
+                        $usersGoods['uid'] = $uid;
+                        $usersGoods['goods_id'] = $winInfo['combination_goods_id'];
+                        $usersGoods['goods_number'] = $goods_number;
+                        $usersGoods['price'] = $winInfo['price'];
+                        $usersGoods['create_time'] = $time;
+                        $usersGoods['status'] = 1; //待出售
+                        $usersGoods['number'] = $goods_user_number;
+                        $usersGoodsArr[]=$usersGoods;
+                    }
+                }
+            }
+            if($winRecordDataArr) {
+                $mangheAwardRecord->insertAll($winRecordDataArr);
+                $goodsUsersData->insertAll($usersGoodsArr);
+            }
+            Db::commit();
+            // clrTODO 区块链转移
+          //  $haixiaLogic = new HaixiaLogic();
+           // $haixiaLogic->transactionGood($info['id'], $result);
+
+            $winInfoArr = addWebSiteUrl($winInfoArr, ['goods_image']);
+            return Response::success('success', $winInfoArr);
+        }
+        Db::rollback();
+        return Response::fail('支付失败');
+    }
 
 }

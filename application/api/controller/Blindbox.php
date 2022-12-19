@@ -19,4 +19,16 @@ class Blindbox extends BaseController
     public function open(){
         return json($this->bBox->open(1));
     }
+
+    public function blindBoxList(){
+        return json($this->bBox->blindBoxList());
+    }
+
+    public function details($id){
+        return json($this->bBox->details($id));
+    }
+
+    public function openBlindBox($id,$number,$pay_password){
+        return json($this->bBox->openBlindBox($id,$number,$this->userInfo,$pay_password));
+    }
 }

@@ -3,6 +3,7 @@
 namespace app\admin\model;
 
 use comservice\Response;
+use datamodel\GoodsUsers;
 use think\Db;
 use think\Model;
 
@@ -84,6 +85,47 @@ class ActivityUser extends Model
             $winning_status = 1;
             $goods_id = $winInfo['combination_goods_id'];
             $winne_actual = $uid;
+            $part = Goods::where('id',$goods_id)->value('part');
+            if($part) {
+                $chipUsers = new ChipUsers();
+                $winRecordData = [];
+                $winRecordData['user_id'] = $uid;
+                $winRecordData['goods_id'] = $goods_id;
+                $winRecordData['part'] = $part;
+                $ischip = $chipUsers->where($winRecordData)->find();
+                if($ischip){
+                    $ischip->total+=1;
+                    $ischip->save();
+                }else{
+                    $winRecordData['createtime'] = $t;
+                    $chipUsers->insert($winRecordData);
+                }
+            }
+            $winRecordData = [];
+            $winRecordData['user_id'] = $uid;
+            $winRecordData['goods_id'] = $winInfo['combination_goods_id'];
+            $winRecordData['status'] = 1;
+            $winRecordData['createtime'] =$winning_time;
+            $mangheAwardRecord = new MangheAwardRecord();
+            $mangheAwardRecord->insert($winRecordData);
+            $goodsUsersData = new GoodsUsers();
+
+            $goods_user_number = $goodsUsersData->where(['goods_id' => $winInfo['combination_goods_id']])->whereNotNull('number')->order('id', 'desc')->value('number');
+            if ($goods_user_number) {
+                $goods_user_number = str_pad($goods_user_number + 1, 6, '0', STR_PAD_LEFT);
+            } else {
+                $goods_user_number = '000001';
+            }
+            $goods_number = uniqueNum();
+            $usersGoods=[];
+            $usersGoods['uid'] = $uid;
+            $usersGoods['goods_id'] = $winInfo['combination_goods_id'];
+            $usersGoods['goods_number'] = $goods_number;
+            $usersGoods['price'] = $winInfo['price'];
+            $usersGoods['create_time'] = $winning_time;
+            $usersGoods['status'] = 1; //待出售
+            $usersGoods['number'] = $goods_user_number;
+            $goodsUsersData->insert($usersGoods);
         }
         $activity->winne_actual = $winne_actual;
         $activity->save();

@@ -114,28 +114,29 @@ class Activity extends Model
                 $accountLogic = new AccountLogic();
                 $accountLogic->addAccount($winne, 1,  $activity->bonus, '参加活动获得特定奖品', '参加活动获得特定奖品');
             }
-            $winRecordDataAll=[];
-            if($activity->winne_actual!=0){
-                $part = Goods::where('id',$activity->special_goods_id)->value('part');
-                $winRecordData = [];
-                $winRecordData['user_id'] = $activity->winne_actual;
-                $winRecordData['goods_id'] = $activity->special_goods_id;
-                $winRecordData['part'] = $part;
-                $winRecordData['createtime'] = $t;
-                $winRecordDataAll[]=$winRecordData;
+            /*   $winRecordDataAll=[];
+               if($activity->winne_actual!=0){
+                   $part = Goods::where('id',$activity->special_goods_id)->value('part');
+                   $winRecordData = [];
+                   $winRecordData['user_id'] = $activity->winne_actual;
+                   $winRecordData['goods_id'] = $activity->special_goods_id;
+                   $winRecordData['part'] = $part;
+                   $winRecordData['createtime'] = $t;
+                   $winRecordDataAll[]=$winRecordData;
             }
-            $alist = ActivityUser::where('activity_id',$id)->where('winning_status',1)->where('goods_id','<>',$activity->special_goods_id)->select();
-            foreach ($alist as $vo){
-                $part = Goods::where('id',$vo->goods_id)->value('part');
-                $winRecordData = [];
-                $winRecordData['user_id'] = $vo->user_id;
-                $winRecordData['goods_id'] = $vo->goods_id;
-                $winRecordData['part'] = $part;
-                $winRecordData['createtime'] = $t;
-                $winRecordDataAll[]=$winRecordData;
-            }
-            $chipUsers = new ChipUsers();
-            $chipUsers->insertAll($winRecordDataAll);
+            /* $alist = ActivityUser::where('activity_id',$id)->where('winning_status',1)->where('goods_id','<>',$activity->special_goods_id)->select();
+             foreach ($alist as $vo){
+                 $part = Goods::where('id',$vo->goods_id)->value('part');
+                 $winRecordData = [];
+                 $winRecordData['user_id'] = $vo->user_id;
+                 $winRecordData['goods_id'] = $vo->goods_id;
+                 $winRecordData['part'] = $part;
+                 $winRecordData['createtime'] = $t;
+                 $winRecordDataAll[]=$winRecordData;
+             }
+             $chipUsers = new ChipUsers();
+             $chipUsers->insertAll($winRecordDataAll);
+            */
             $num++;
             $activity->status = 2;
             $activity->save();
