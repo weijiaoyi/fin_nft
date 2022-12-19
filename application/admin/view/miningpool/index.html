@@ -23,12 +23,8 @@
 
                     </div>
                     <table id="table" class="table table-striped table-bordered table-hover table-nowrap"
-                           data-operate-edit="false"
-                           data-operate-del="false"
-                           data-show-export="false"
-                           data-show-toggle="false"
-                           data-show-columns="false"
-                           data-show-search="false"
+                           data-operate-edit="{:$auth->check('mining_pool_level/edit')}"
+                           data-operate-del="{:$auth->check('mining_pool_level/del')}"
                            width="100%">
                     </table>
                 </div>

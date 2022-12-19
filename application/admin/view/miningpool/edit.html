@@ -13,6 +13,15 @@
         </div>
     </div>
     <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">状态:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="radio">
+                <label for="row[status]-0"><input id="row[status]-0" name="row[status]" type="radio" value="0" {in name="0" value="$row.status"}checked{/in} /> 关闭</label>
+                <label for="row[status]-1"><input id="row[status]-1" name="row[status]" type="radio" value="1" {in name="1" value="$row.status"}checked{/in} /> 开启</label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">封面图:</label>
         <div class="col-xs-12 col-sm-8">
             <div class="input-group">
@@ -55,6 +64,7 @@
             <textarea id="c-introduce" class="form-control editor" rows="5" name="row[introduce]" cols="50">{$row.introduce|htmlentities}</textarea>
         </div>
     </div>
+
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
