@@ -96,4 +96,15 @@ class Backpack extends BaseController
         return json( Response::success('success', ['count' => $count, 'data' => $data, 'page' => $page, 'pagesize' => $pagesize]));
     }
 
+    public function synthesis($level,$number){
+        $goodsUser =  new ChipUsers();
+        $where['gu.user_id'] = $this->uid;
+        $field = 'gu.id,g.id as goods_id,g.name,g.level,g.price,gu.part,g.image,gu.total as number';
+        $data = $goodsUser->alias('gu')
+            ->join('goods g', 'gu.goods_id = g.id','LEFT')
+            ->where($where)
+            ->field($field)
+            ->order(['gu.id desc'])
+            ->select();
+    }
 }

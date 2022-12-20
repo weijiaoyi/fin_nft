@@ -651,7 +651,8 @@ class UserLogic
             $jwt = Jwt::encode($token, Env::get('jws.secret', '123456'));
             $redis = GetRedis::getRedis();
             $redis->setItem($jwt, $userInfo['id']);
-            $this->usersData->updateByWhere(['id' => $userInfo['id']], ['app_token' => $jwt,'nonce'=>$nonce, 'login_time' => date('Y-m-d H:i:s')]);
+            $nick_name= 'sp_' . rand(111111, 999999);
+            $this->usersData->updateByWhere(['id' => $userInfo['id']],['nick_name'=>$nick_name],['app_token' => $jwt,'nonce'=>$nonce, 'login_time' => date('Y-m-d H:i:s')]);
             return Response::success('授权成功', ['app_token' => $jwt]);
         } else {
             return Response::fail('授权失败');

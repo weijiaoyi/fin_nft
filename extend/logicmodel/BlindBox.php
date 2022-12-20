@@ -4,9 +4,11 @@
 namespace logicmodel;
 
 
+use app\admin\model\ChipUsers;
 use app\admin\model\GoodsMangheConfig;
 use app\admin\model\GoodsMangheNumber;
 use app\admin\model\GoodsMangheUsers;
+use app\admin\model\GoodsRank;
 use app\admin\model\MangheAwardRecord;
 use app\common\model\Config;
 use comservice\GetRedis;
@@ -343,14 +345,16 @@ class BlindBox
         if ($result) {
             $goodsMangheConfigModel = new GoodsMangheConfig();
             $goodsUsersData = new GoodsUsers();
+            $chipUser = new ChipUsers();
             $mangheAwardRecord = new MangheAwardRecord();
             $winRecordDataArr = [];
             $usersGoodsArr = [];
+            $chipArr=[];
             $winInfoArr = [];
             for($i=0;$i<$number;$i++) {
                 $goodsMangheList = $goodsMangheConfigModel->alias('c')
                     ->join('goods g', 'g.id = c.combination_goods_id')
-                    ->field(['c.*', 'g.name goods_name', 'g.image goods_image', 'g.price'])
+                    ->field(['c.*', 'g.name goods_name', 'g.image goods_image', 'g.price','g.level','g.part'])
                     ->where(['goods_id' => $goods_id])
                     ->select();
                 if ($goodsMangheList) {
@@ -373,28 +377,42 @@ class BlindBox
                         $winRecordData['status'] = $winInfo['is_win'] ? 1 : 0;
                         $winRecordData['createtime'] = time();
                         $winRecordDataArr[]=$winRecordData;
-                        $goods_user_number = $goodsUsersData->where(['goods_id' => $winInfo['combination_goods_id']])->whereNotNull('number')->order('id', 'desc')->value('number');
-                        if ($goods_user_number) {
-                            $goods_user_number = str_pad($goods_user_number + 1, 6, '0', STR_PAD_LEFT);
-                        } else {
-                            $goods_user_number = '000001';
+                        if($winInfo['part']==0){
+                            $chip = [];
+                            $chip['user_id'] = $uid;
+                            $chip['goods_id'] = $winInfo['combination_goods_id'];
+                            $chip['part'] = $winInfo['part'];
+                            $chip['create_time'] = $time;
+                            $chipArr[] = $chip;
+                        }else {
+                            $goods_user_number = $goodsUsersData->where(['goods_id' => $winInfo['combination_goods_id']])->whereNotNull('number')->order('id', 'desc')->value('number');
+                            if ($goods_user_number) {
+                                $goods_user_number = str_pad($goods_user_number + 1, 6, '0', STR_PAD_LEFT);
+                            } else {
+                                $goods_user_number = '000001';
+                            }
+                            $goods_number = uniqueNum();
+                            $usersGoods = [];
+                            $usersGoods['uid'] = $uid;
+                            $usersGoods['goods_id'] = $winInfo['combination_goods_id'];
+                            $usersGoods['goods_number'] = $goods_number;
+                            $usersGoods['price'] = $winInfo['price'];
+                            $usersGoods['create_time'] = $time;
+                            $usersGoods['status'] = 1; //待出售
+                            $usersGoods['number'] = $goods_user_number;
+                            $usersGoodsArr[] = $usersGoods;
                         }
-                        $goods_number = uniqueNum();
-                        $usersGoods=[];
-                        $usersGoods['uid'] = $uid;
-                        $usersGoods['goods_id'] = $winInfo['combination_goods_id'];
-                        $usersGoods['goods_number'] = $goods_number;
-                        $usersGoods['price'] = $winInfo['price'];
-                        $usersGoods['create_time'] = $time;
-                        $usersGoods['status'] = 1; //待出售
-                        $usersGoods['number'] = $goods_user_number;
-                        $usersGoodsArr[]=$usersGoods;
                     }
                 }
             }
             if($winRecordDataArr) {
                 $mangheAwardRecord->insertAll($winRecordDataArr);
-                $goodsUsersData->insertAll($usersGoodsArr);
+                if($usersGoodsArr) {
+                    $goodsUsersData->insertAll($usersGoodsArr);
+                }
+                if($chipArr) {
+                    $chipUser->insertAll($chipArr);
+                }
             }
             Db::commit();
             // clrTODO 区块链转移
@@ -406,6 +424,41 @@ class BlindBox
         }
         Db::rollback();
         return Response::fail('支付失败');
+    }
+
+    public function nftRank()
+    {
+        $rank = GoodsRank::order('id','asc')->select();
+        if($rank){
+            $rank = collection($rank)->toArray();
+            $rank = addWebSiteUrl($rank, ['image']);
+        }
+        foreach ($rank as &$vo){
+            $log = MangheAwardRecord::alias('r')
+                ->join('goods g', 'r.goods_id = g.id')
+                ->join('users u', 'r.user_id = u.id')
+                ->field('u.nick_name,g.level,g.part,\'/uploads/base/headicon.png\' as head_img')
+                ->where('r.status',1)
+                ->where('g.level',$vo['id'])
+                ->limit(10)
+                ->order('r.id','desc')
+                ->select();
+            if(count($log)==0){
+                $level = $vo['id'];
+                $log = MangheAwardRecord::alias('r')
+                    ->join('goods g', 'r.goods_id = g.id')
+                    ->join('users u', 'r.user_id = u.id')
+                    ->field("u.nick_name, $level as level,g.part,'/uploads/base/headicon.png' as head_img")
+                    ->where('r.status',1)
+                    ->orderRaw('rand()')
+                    ->limit(10)
+                    ->select();
+            }
+            $log = collection($log)->toArray();
+            $log = addWebSiteUrl($log, ['head_img']);
+            $vo['scroll'] = $log;
+        }
+        return Response::success('success', $rank);
     }
 
 }

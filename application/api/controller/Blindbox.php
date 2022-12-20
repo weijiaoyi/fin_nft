@@ -28,7 +28,7 @@ class Blindbox extends BaseController
         return json($this->bBox->details($id));
     }
 
-    public function openBlindBox($id,$number,$pay_password){
-        return json($this->bBox->openBlindBox($id,$number,$this->userInfo,$pay_password));
+    public function nftRank(){
+        return json($this->bBox->nftRank());
     }
 }
