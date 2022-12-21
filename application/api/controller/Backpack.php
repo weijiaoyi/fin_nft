@@ -217,7 +217,7 @@ class Backpack extends BaseController
         }
         Db::startTrans();
             for($i=1;$i<5;$i++) {
-                $goodsUser->where('status', 1)-where('level', $level)->where('part',$i)->limit($number)->save(['status'=>4]);
+                $goodsUser->where('status', 1)->where('level', $level)->where('part',$i)->limit($number)->save(['status'=>4]);
             }
             $adds=[];
             for($i=0;$i<$number;$i++) {
