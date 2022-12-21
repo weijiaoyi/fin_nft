@@ -5,29 +5,246 @@ namespace app\api\controller;
 
 
 use app\admin\model\ChipUsers;
+use app\admin\model\Goods;
 use app\admin\model\GoodsRank;
 use app\admin\model\GoodsUsers;
 use comservice\Response;
+use think\Db;
 use think\Request;
 
 class Backpack extends BaseController
 {
 
+    /**
+     * 背包
+     * @param int $level
+     * @param int $is_chip
+     * @param int $page
+     * @param int $pagesize
+     * @return \think\response\Json
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function index($level=-1,$is_chip=-1,$page=1,$pagesize=10){
+        $goodsUser =  new GoodsUsers();
+        $where=[];
+        if($is_chip!=-1){
+            $where['gu.is_chip'] = $is_chip;
+        }
+        if($level!=-1){
+            $where['gu.level'] = $level;
+        }
+        $where['gu.uid'] = $this->uid;
+        $where['gu.status'] = array('lt',4);
+        $count = $goodsUser->alias('gu')
+            ->where($where)
+            ->count();
+        if ($count <= 0)  return json( Response::success('暂无数据', ['count' => $count, 'data' => [], 'page' => $page, 'pagesize' => $pagesize]));
+        $field = 'gu.id,gu.is_chip,gu.level,gu.part,gu.price,gr.image,g.image as chip_image,gu.status';
+        $data = $goodsUser->alias('gu')
+            ->join('goods g', 'gu.goods_id = g.id','LEFT')
+            ->join('goods_rank gr', 'g.level = gr.id','LEFT')
+            ->where($where)
+            ->field($field)
+            ->order(['gu.id desc'])
+            ->page($page, $pagesize)
+            ->select();
+        if ($data) {
+            $data = collection($data)->toArray();
+            $data = addWebSiteUrl($data, ['image','chip_image']);
+            foreach ($data as &$vo){
+                $vo['image'] = $vo['is_chip']==1 ?  $vo['chip_image'] :  $vo['image'];
+                unset( $vo['chip_image']);
+            }
+        }
+        return json( Response::success('success', ['count' => $count, 'data' => $data, 'page' => $page, 'pagesize' => $pagesize]));
+    }
+
+    /**
+     * 详情
+     * @param $id
+     * @return \think\response\Json
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function detail($id){
+        $goodsUser =  new GoodsUsers();
+        $where=[];
+        $where['gu.id'] = $id;
+        $where['gu.uid'] = $this->uid;
+        $field = 'gu.id,gu.is_chip,gu.part,gu.level,gu.price,gr.image,g.image as chip_image,gu.status';
+        $data = $goodsUser->alias('gu')
+            ->join('goods g', 'gu.goods_id = g.id','LEFT')
+            ->join('goods_rank gr', 'g.level = gr.id','LEFT')
+            ->where($where)
+            ->field($field)
+            ->order(['gu.id desc'])
+            ->find();
+        if ($data) {
+            $data = $data->toArray();
+            $data = addWebSiteUrl($data, ['image','chip_image']);
+        }
+        return json( Response::success('success',$data));
+    }
+
+    /**
+     * 出售
+     * @param $id
+     * @param int $sell_type
+     * @param $price
+     * @param int $specify_ui
+     * @param int $time
+     * @return \think\response\Json
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function sell($id=0,$sell_type = 1,$price=0,$specify_ui=0,$time=24){
+        if($id==0 || $price<=0 ){
+            Db::rollback();
+            return json( Response::fail('参数异常'));
+        }
+         Db::startTrans();
+            $goodsUser = GoodsUsers::where(['uid'=>$this->uid,'id'=>$id])->find();
+            if(!$goodsUser){
+                Db::rollback();
+                return json( Response::fail('权限不足，不可出售'));
+            }
+            if($goodsUser->status!=1){
+                Db::rollback();
+                return json( Response::fail('当前状态不可出售'));
+            }
+            $map =[];
+            $map['goods_user_id'] = $goodsUser->id;
+            $goods = Goods::where(['level'=>$goodsUser['level'],'part'=>$goodsUser['part']])->find();
+            $add = [];
+            $add['image'] = $goods->image;
+            $add['sell_type'] = $sell_type;
+            $add['specify_ui'] = $sell_type==3 ? $specify_ui : 0;
+            $add['duration'] = $time;
+            $add['price'] = $price;
+            $add['stock'] = 1;
+            $add['is_chip'] = $goodsUser->is_chip;
+            $add['is_del'] = 0;
+            $add['is_show'] = 1;
+            $add['is_manghe'] = 0; //非盲盒
+            $add['is_can_buy'] = 1; //可以参与购买
+            $add['start_time'] = date('Y-m-d H:i:s');
+            $add['end_time'] = $time==24 ? date('Y-m-d H:i:s',strtotime('+1 day')) : date('Y-m-d H:i:s',strtotime('+2 day'));
+            Goods::create($add);
+            $goodsUser['status'] = 2;
+            $goodsUser->save();
+         Db::commit();
+    }
+
+    /**
+     * 碎片分组数
+     * @return \think\response\Json
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     public function levelNum()
     {
         $rank = GoodsRank::order('id','asc')->select();
-        $goodsUser =  new GoodsUsers();
         foreach($rank as &$vo){
-            $vo->number = $goodsUser->alias('gu')
-                ->join('goods g', 'gu.goods_id = g.id','LEFT')
-                ->where('g.level',$vo['id'])
-                ->where('gu.uid',$this->uid)
-                ->where('gu.status','lt',3)
-                ->count();
+            $vo->number = GoodsUsers::alias('gu')
+                    ->join('goods g', 'gu.goods_id = g.id','LEFT')
+                    ->where('g.level',$vo['id'])
+                    ->where('gu.uid',$this->uid)
+                    ->where('gu.status',1)
+                    ->count();
         }
         $data = collection($rank)->toArray();
         $data = addWebSiteUrl($data, ['image']);
         return  json( Response::success('获取成功', $data));
+    }
+
+    public function chipNum()
+    {
+        $rank = GoodsRank::order('id','asc')->select();
+        $goodsUser =  new GoodsUsers();
+        $data = collection($rank)->toArray();
+        foreach($data as &$vo){
+            $arr = [];
+            $vo['part'] = [];
+            for($i=1;$i<5;$i++) {
+                $num = $goodsUser->alias('gu')
+                    ->join('goods g', 'gu.goods_id = g.id', 'LEFT')
+                    ->where('gu.level', $vo['id'])
+                    ->where('gu.uid', $this->uid)
+                    ->where('gu.is_chip', 1)
+                    ->where('gu.part', $i)
+                    ->where('gu.status', 1)
+                    ->count();
+                $arr[] = $num;
+                $chip = [];
+                $chip['num'] = $num;
+                $chip['image'] = Goods::where('part',$i)->where('level',$vo['id'])->value('image');
+
+                $chip = addWebSiteUrl($chip, ['image']);
+                $vo['part'][] = $chip;
+            }
+            $vo['max_num'] = min($arr);
+        }
+        $data = addWebSiteUrl($data, ['image']);
+        return  json( Response::success('获取成功', $data));
+    }
+
+
+    public function synthesis($level,$number){
+        $goodsUser =  new GoodsUsers();
+        $arr = [];
+        for($i=1;$i<5;$i++) {
+            $num = $goodsUser->alias('gu')
+                ->join('goods g', 'gu.goods_id = g.id', 'LEFT')
+                ->where('gu.level', $level)
+                ->where('gu.uid', $this->uid)
+                ->where('gu.is_chip', 1)
+                ->where('gu.part', $i)
+                ->where('gu.status', 1)
+                ->count();
+            $arr[] = $num;
+        }
+        $goods = Goods::where('level',$level)->where('part',0)->where('goods_user_id',0)->find();
+        if($number>min($arr)){
+            return  json( Response::fail('碎片不足'));
+        }
+        Db::startTrans();
+            for($i=1;$i<5;$i++) {
+                $goodsUser->where('status', 1)-where('level', $level)->where('part',$i)->limit($number)->save(['status'=>4]);
+            }
+            $adds=[];
+            for($i=0;$i<$number;$i++) {
+                $add = [];
+                $goods_user_number = $goodsUser->where(['level' => $level])->whereNotNull('number')->order('id', 'desc')->value('number');
+                if ($goods_user_number) {
+                    $goods_user_number = str_pad($goods_user_number + 1, 6, '0', STR_PAD_LEFT);
+                } else {
+                    $goods_user_number = '000001';
+                }
+                $goods_number = uniqueNum();
+                $usersGoods = [];
+                $usersGoods['uid'] =  $this->uid;
+                $usersGoods['goods_id'] = $goods['id'];
+                $usersGoods['goods_number'] = $goods_number;
+                $usersGoods['price'] = $goods['price'];
+                $usersGoods['create_time'] = date('Y-m-d H:i:s');
+                $usersGoods['status'] = 1; //待出售
+                $usersGoods['part'] = 0;
+                $usersGoods['level'] = $level;
+                $usersGoods['number'] = $goods_user_number;
+                $usersGoods['source'] = 2;
+                $adds[] = $add;
+            }
+            $goodsUser->insertAll($adds);
+        Db::commit();
+        return  json( Response::success('合成成功'));
     }
 
     /**
@@ -96,15 +313,5 @@ class Backpack extends BaseController
         return json( Response::success('success', ['count' => $count, 'data' => $data, 'page' => $page, 'pagesize' => $pagesize]));
     }
 
-    public function synthesis($level,$number){
-        $goodsUser =  new ChipUsers();
-        $where['gu.user_id'] = $this->uid;
-        $field = 'gu.id,g.id as goods_id,g.name,g.level,g.price,gu.part,g.image,gu.total as number';
-        $data = $goodsUser->alias('gu')
-            ->join('goods g', 'gu.goods_id = g.id','LEFT')
-            ->where($where)
-            ->field($field)
-            ->order(['gu.id desc'])
-            ->select();
-    }
+
 }

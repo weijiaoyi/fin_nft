@@ -27,7 +27,7 @@ class Staking extends BaseController
             ->join('goods g', 'gu.goods_id = g.id','LEFT')
             ->where('g.level',$level)
             ->where('gu.uid',$this->uid)
-            ->where('gu.status','lt',3)
+            ->where('gu.status',1)
             ->count();
         if($number>$user_number){
             return json( Response::fail('质押数量超出背包数量'));
@@ -46,7 +46,7 @@ class Staking extends BaseController
         $add['create_time'] = date('Y-m-d H:i:s');
         $add['start_at'] = date("Y-m-d",strtotime("+1 day"));
         $stak->insert($add);
-        $goodsUser->where('uid',$this->uid)->where('status','lt',3)->order('id','asc')->limit($number)->save(['status'=>5]);
+        $goodsUser->where('uid',$this->uid)->where('status',1)->order('id','asc')->limit($number)->save(['status'=>5]);
         Db::commit();
         return json(Response::success('质押成功'));
     }

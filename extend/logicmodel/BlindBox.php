@@ -294,6 +294,9 @@ class BlindBox
 
     public function openBlindBox($goods_id,$number,$userInfo,$pay_password)
     {
+        if($goods_id==0 || $number==0 || empty($pay_password)){
+            return Response::fail('盲盒不存在');
+        }
         $info = $this->goodsData->find($goods_id);
         if(!$info){
             return Response::fail('盲盒不存在');
@@ -345,16 +348,12 @@ class BlindBox
         if ($result) {
             $goodsMangheConfigModel = new GoodsMangheConfig();
             $goodsUsersData = new GoodsUsers();
-            $chipUser = new ChipUsers();
-            $mangheAwardRecord = new MangheAwardRecord();
-            $winRecordDataArr = [];
             $usersGoodsArr = [];
-            $chipArr=[];
             $winInfoArr = [];
             for($i=0;$i<$number;$i++) {
                 $goodsMangheList = $goodsMangheConfigModel->alias('c')
                     ->join('goods g', 'g.id = c.combination_goods_id')
-                    ->field(['c.*', 'g.name goods_name', 'g.image goods_image', 'g.price','g.level','g.part'])
+                    ->field(['c.*', 'g.name goods_name', 'g.image goods_image', 'g.price','g.level','g.part','g.is_chip'])
                     ->where(['goods_id' => $goods_id])
                     ->select();
                 if ($goodsMangheList) {
@@ -370,49 +369,29 @@ class BlindBox
                         }
                     }
                     if($winInfo) {
-                        //添加记录到
-                        $winRecordData = [];
-                        $winRecordData['user_id'] = $uid;
-                        $winRecordData['goods_id'] = $winInfo['combination_goods_id'];
-                        $winRecordData['status'] = $winInfo['is_win'] ? 1 : 0;
-                        $winRecordData['createtime'] = time();
-                        $winRecordDataArr[]=$winRecordData;
-                        if($winInfo['part']==0){
-                            $chip = [];
-                            $chip['user_id'] = $uid;
-                            $chip['goods_id'] = $winInfo['combination_goods_id'];
-                            $chip['part'] = $winInfo['part'];
-                            $chip['create_time'] = $time;
-                            $chipArr[] = $chip;
-                        }else {
-                            $goods_user_number = $goodsUsersData->where(['goods_id' => $winInfo['combination_goods_id']])->whereNotNull('number')->order('id', 'desc')->value('number');
-                            if ($goods_user_number) {
-                                $goods_user_number = str_pad($goods_user_number + 1, 6, '0', STR_PAD_LEFT);
-                            } else {
-                                $goods_user_number = '000001';
-                            }
-                            $goods_number = uniqueNum();
-                            $usersGoods = [];
-                            $usersGoods['uid'] = $uid;
-                            $usersGoods['goods_id'] = $winInfo['combination_goods_id'];
-                            $usersGoods['goods_number'] = $goods_number;
-                            $usersGoods['price'] = $winInfo['price'];
-                            $usersGoods['create_time'] = $time;
-                            $usersGoods['status'] = 1; //待出售
-                            $usersGoods['number'] = $goods_user_number;
-                            $usersGoodsArr[] = $usersGoods;
+                        $goods_user_number = $goodsUsersData->where(['goods_id' => $winInfo['combination_goods_id']])->whereNotNull('number')->order('id', 'desc')->value('number');
+                        if ($goods_user_number) {
+                            $goods_user_number = str_pad($goods_user_number + 1, 6, '0', STR_PAD_LEFT);
+                        } else {
+                            $goods_user_number = '000001';
                         }
+                        $goods_number = uniqueNum();
+                        $usersGoods = [];
+                        $usersGoods['uid'] = $uid;
+                        $usersGoods['goods_id'] = $winInfo['combination_goods_id'];
+                        $usersGoods['goods_number'] = $goods_number;
+                        $usersGoods['price'] = $winInfo['price'];
+                        $usersGoods['create_time'] = $time;
+                        $usersGoods['status'] = 1; //待出售
+                        $usersGoods['part'] = $winInfo['part'];
+                        $usersGoods['level'] = $winInfo['level'];
+                        $usersGoods['number'] = $goods_user_number;
+                        $usersGoodsArr[] = $usersGoods;
                     }
                 }
             }
-            if($winRecordDataArr) {
-                $mangheAwardRecord->insertAll($winRecordDataArr);
-                if($usersGoodsArr) {
-                    $goodsUsersData->insertAll($usersGoodsArr);
-                }
-                if($chipArr) {
-                    $chipUser->insertAll($chipArr);
-                }
+            if($usersGoodsArr) {
+                $goodsUsersData->insertAll($usersGoodsArr);
             }
             Db::commit();
             // clrTODO 区块链转移
@@ -434,22 +413,20 @@ class BlindBox
             $rank = addWebSiteUrl($rank, ['image']);
         }
         foreach ($rank as &$vo){
-            $log = MangheAwardRecord::alias('r')
-                ->join('goods g', 'r.goods_id = g.id')
-                ->join('users u', 'r.user_id = u.id')
-                ->field('u.nick_name,g.level,g.part,\'/uploads/base/headicon.png\' as head_img')
-                ->where('r.status',1)
+            $log = GoodsUsers::alias('r')
+                ->join('users u', 'r.uid = u.id')
+                ->field('u.nick_name,g.level,r.part,\'/uploads/base/headicon.png\' as head_img')
+                ->where('r.source',1)
                 ->where('g.level',$vo['id'])
                 ->limit(10)
                 ->order('r.id','desc')
                 ->select();
             if(count($log)==0){
                 $level = $vo['id'];
-                $log = MangheAwardRecord::alias('r')
-                    ->join('goods g', 'r.goods_id = g.id')
-                    ->join('users u', 'r.user_id = u.id')
-                    ->field("u.nick_name, $level as level,g.part,'/uploads/base/headicon.png' as head_img")
-                    ->where('r.status',1)
+                $log = GoodsUsers::alias('r')
+                    ->join('users u', 'r.uid = u.id')
+                    ->field("u.nick_name, $level as level,r.part,'/uploads/base/headicon.png' as head_img")
+                    ->where('r.source',1)
                     ->orderRaw('rand()')
                     ->limit(10)
                     ->select();
