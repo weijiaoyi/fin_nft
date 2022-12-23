@@ -43,9 +43,9 @@ class Login extends Controller
      * @param $address
      * @return \think\response\Json
      */
-    public function metaMaskLogin($address)
+    public function metaMaskLogin($address,$invite)
     {
-        return json($this->userLogic->metaMaskLogin($address));
+        return json($this->userLogic->metaMaskLogin($address,$invite));
     }
 
     /**

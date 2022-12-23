@@ -137,4 +137,8 @@ return array (
   'blind_box_level_7_part_2_probability' => '7.2',
   'blind_box_level_7_part_3_probability' => '7.3',
   'blind_box_level_7_part_4_probability' => '7.4',
+  'commission_level_1' => '3',
+  'commission_level_2' => '2',
+  'bidding_step' => '10',
+  'transaction_fees' => '1',
 );

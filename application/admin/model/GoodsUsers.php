@@ -2,19 +2,16 @@
 
 namespace app\admin\model;
 
+use comservice\Response;
+use think\Db;
 use think\Model;
 
 
 class GoodsUsers extends Model
 {
-
-    
-
-    
-
     // 表名
     protected $name = 'goods_users';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
 
@@ -29,9 +26,22 @@ class GoodsUsers extends Model
         'is_show_text',
         'is_del_text'
     ];
-    
 
-    
+    public static function offShelve($id,$uid)
+    {
+        Db::startTrans();
+        $gu = self::where('id',$id)->where('uid',$uid)->find();
+        if($gu['status']!=2){
+            return Response::fail('不在交易中，不可下架');
+        }
+        $gu->status = 1;
+        $gu->save();
+        Goods::where('goods_user_id',$gu['id'])->delete();
+        Db::commit();
+        return Response::success('下架成功');
+    }
+
+
     public function getStatusList()
     {
         return ['1' => __('Status 1'), '2' => __('Status 2'), '3' => __('Status 3'), '4' => __('Status 4')];
@@ -72,8 +82,6 @@ class GoodsUsers extends Model
     }
 
 
-
-
     public function users()
     {
         return $this->belongsTo('Users', 'uid', 'id', [], 'LEFT')->setEagerlyType(0);
@@ -84,4 +92,5 @@ class GoodsUsers extends Model
     {
         return $this->belongsTo('Goods', 'goods_id', 'id', [], 'LEFT')->setEagerlyType(0);
     }
+
 }

@@ -4,6 +4,7 @@
 namespace logicmodel;
 
 
+use app\admin\model\Bill;
 use app\lib\exception\Jwt;
 use comservice\GetRedis;
 use comservice\Response;
@@ -271,15 +272,10 @@ class UserLogic
      * @throws \think\Exception
      * @throws \think\exception\PDOException
      */
-    public function updatePayPassword($userInfo, $pay_password, $pay_password_re, $code, $type)
+    public function updatePayPassword($userInfo, $pay_password, $pay_password_re, $old_password)
     {
-        if ($pay_password != $pay_password_re) return Response::fail('支付面输入不一致');
-        if ($type != 1) {
-            if ($pay_password != $pay_password_re) return Response::fail('两次密码输入不一致');
-            $result = validateCode($userInfo['phone'], $code, 2);
-            if (!$result) return Response::fail('验证码错误');
-        }
-
+        if (md5(md5($old_password) . $userInfo['salt']) != $userInfo['pay_password']) return Response::fail('原始密码错误');
+        if ($pay_password != $pay_password_re) return Response::fail('两次密码输入不一致');
         $salt = rand(1111, 9999);
         $password = md5(md5($pay_password) . $salt);
         $data['pay_salt'] = $salt;
@@ -402,24 +398,49 @@ class UserLogic
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function team($userInfo)
+    public function team($level,$page,$pagesize,$userInfo)
     {
         $uid = $userInfo['id'];
-        $where['pid'] = $uid;
+        if($level==2){
+            $where['pid_2'] = $uid;
+        }else{
+            $where['pid'] = $uid;
+        }
         $where['is_del'] = 0;
-        $field = ['phone', 'head_image', 'create_time'];
+        $count = $this->usersData->where($where)->count();
+        if ($count <= 0) return Response::success('暂无数据', ['count' => $count, 'data' => [], 'page' => $page, 'pagesize' => $pagesize]);
+        $field = ['nick_name', 'create_time'];
         $data = $this->usersData
             ->where($where)
             ->field($field)
             ->order(['id desc'])
+            ->page($page, $pagesize)
             ->select();
-        if ($data) {
-            $data = collection($data)->toArray();
-            $data = addWebSiteUrl($data, ['head_image']);
-        }
-        return Response::success('暂无数据', $data);
+        return Response::success('暂无数据', ['count' => $count, 'data' => $data, 'page' => $page, 'pagesize' => $pagesize]);
     }
 
+    public function teamStatistics($level,$uid){
+        if($level==2){
+            $where['pid_2'] = $uid;
+            $bill_type = 9;
+        }else{
+            $where['pid'] = $uid;
+            $bill_type = 8;
+        }
+        $where['is_del'] = 0;
+        $num = $this->usersData->where($where)->count();
+        $map['uid'] = $uid;
+        $map['bill_type'] = $bill_type;
+        $total_rebate = Bill::where($map)->sum('account');
+        $total_rebate = $total_rebate ? $total_rebate : 0;
+        $today = date('Y-m-d');
+        $where['create_time'] = ['gt',$today];
+        $today_num = $this->usersData->where($where)->count();
+        $map['create_time'] = ['gt',$today];
+        $today_rebate = Bill::where($map)->sum('account');
+        $today_rebate = $today_rebate ? $today_rebate : 0;
+        return Response::success('获取成功', ['total_num' => $num, 'today_num' => $today_num, 'total_rebate' => $total_rebate, 'today_rebate' => $today_rebate]);
+    }
     /**
      * 收款信息
      * @param $userInfo
@@ -624,8 +645,17 @@ class UserLogic
         return Response::success('绑定成功', ['app_token' => $token]);
     }
 
-    public function metaMaskLogin($address)
+    public function metaMaskLogin($address,$invite='')
     {
+        $pid = 0;
+        $pid_2 = 0;
+        if (!empty($invite)) {
+            $superior = $this->usersData->where(['uuid' => $invite, 'is_del' => 0])->find();
+            if($superior){
+                $pid = $superior['id'];
+                $pid_2 = $superior['pid'];
+            }
+        }
         $userInfo = $this->usersData->where(['wallet_address' => $address])->find();
         $nonce = uniqid();
         if($userInfo){
@@ -635,7 +665,7 @@ class UserLogic
                 $this->usersData->where(['wallet_address' => $address])->update(['nonce'=>$nonce]);
             }
         }else{
-            $this->usersData->insert(['wallet_address' => $address,'nonce'=>$nonce,'create_time'=> date('Y-m-d H:i:s')]);
+            $this->usersData->insert(['wallet_address' => $address,'pid'=>$pid,'pid_2'=>$pid_2,'nonce'=>$nonce,'create_time'=> date('Y-m-d H:i:s')]);
         }
         return Response::success('获取成功', ['nonce' => $nonce]);
     }
@@ -652,7 +682,8 @@ class UserLogic
             $redis = GetRedis::getRedis();
             $redis->setItem($jwt, $userInfo['id']);
             $nick_name= 'sp_' . rand(111111, 999999);
-            $this->usersData->updateByWhere(['id' => $userInfo['id']],['nick_name'=>$nick_name],['app_token' => $jwt,'nonce'=>$nonce, 'login_time' => date('Y-m-d H:i:s')]);
+            $uuid = uuid();
+            $this->usersData->updateByWhere(['id' => $userInfo['id']],['uuid'=>$uuid,'nick_name'=>$nick_name,'app_token' => $jwt,'nonce'=>$nonce, 'login_time' => date('Y-m-d H:i:s')]);
             return Response::success('授权成功', ['app_token' => $jwt]);
         } else {
             return Response::fail('授权失败');
@@ -676,6 +707,19 @@ class UserLogic
 
     private function pubKeyToAddress($pubkey) {
         return "0x" . substr(Keccak::hash(substr(hex2bin($pubkey->encode("hex")), 1), 256), 24);
+    }
+
+    public function setPayPassword($userInfo, $pay_password, $pay_password_re)
+    {
+        if (!empty($userInfo['pay_password'])) return Response::fail('已经设置过支付密码');
+        if ($pay_password != $pay_password_re) return Response::fail('两次密码输入不一致');
+        $salt = rand(1111, 9999);
+        $password = md5(md5($pay_password) . $salt);
+        $data['pay_salt'] = $salt;
+        $data['pay_password'] = $password;
+        $result = $this->usersData->updateByWhere(['id' => $userInfo['id']], $data);
+        if ($result > 0) return Response::success('设置成功');
+        return Response::fail('设置失败');
     }
 
 }

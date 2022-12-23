@@ -145,7 +145,7 @@ class NotifyLogic
                 return false;
             }
         } else {
-            $result = $accountLogic->addAccount($uid, 1, $price, '出售藏品', '出售藏品');
+            $result = $accountLogic->addAccount($uid, 1, $price, 6,'市场卖出');
             if (!$result) {
                 Db::rollback();
                 return false;

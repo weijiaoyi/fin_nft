@@ -91,9 +91,20 @@ class User extends BaseController
      * @throws \think\Exception
      * @throws \think\exception\PDOException
      */
-    public function updatePayPassword($pay_password, $pay_password_re, $code, $type)
+    public function updatePayPassword($pay_password, $pay_password_re,$old_password)
     {
-        return json($this->userLogic->updatePayPassword($this->userInfo, $pay_password, $pay_password_re, $code, $type));
+        return json($this->userLogic->updatePayPassword($this->userInfo, $pay_password, $pay_password_re, $old_password));
+    }
+
+    /**
+     * 设置支付密码
+     * @param $pay_password
+     * @param $pay_password_re
+     * @return \think\response\Json
+     */
+    public function setPayPassword($pay_password, $pay_password_re)
+    {
+        return json($this->userLogic->setPayPassword($this->userInfo, $pay_password, $pay_password_re));
     }
 
     /**
@@ -104,9 +115,9 @@ class User extends BaseController
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function team()
+    public function team($level=1,$page=1,$pagesize=10)
     {
-        return json($this->userLogic->team($this->userInfo));
+        return json($this->userLogic->team($level,$page,$pagesize,$this->userInfo));
     }
 
     /**

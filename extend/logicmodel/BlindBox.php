@@ -18,6 +18,7 @@ use datamodel\GoodsConfig;
 use datamodel\GoodsTransfer;
 use datamodel\GoodsUsers;
 use datamodel\Orders;
+use datamodel\Users;
 use think\Db;
 
 class BlindBox
@@ -307,10 +308,10 @@ class BlindBox
         }
         $password = md5(md5($pay_password) . $userInfo['pay_salt']);
         if(empty($userInfo['pay_password'])){
-            //return Response::fail('请先设置支付密码');
+            return Response::fail('请先设置支付密码');
         }
         if($password!=$userInfo['pay_password']){
-            //return Response::fail('支付密码错误');
+            return Response::fail('支付密码错误');
         }
         $uid = $userInfo['id'];
         $price = $n_info['amount'];
@@ -320,7 +321,7 @@ class BlindBox
         $time = date('Y-m-d H:i:s');
         Db::startTrans();
         $accountLogic = new AccountLogic();
-        $result = $accountLogic->subAccount($uid, 1, $price, '购买盲盒', '购买盲盒');
+        $result = $accountLogic->subAccount($uid, 1, $price, 4, '抽取NFT盲盒'.$n_info['number'].'次');
         if (!$result) {
             Db::rollback();
             return Response::fail('余额不足');
@@ -393,6 +394,8 @@ class BlindBox
             if($usersGoodsArr) {
                 $goodsUsersData->insertAll($usersGoodsArr);
             }
+            //佣金
+            $this->sub_commission($uid, $price);
             Db::commit();
             // clrTODO 区块链转移
           //  $haixiaLogic = new HaixiaLogic();
@@ -436,6 +439,22 @@ class BlindBox
             $vo['scroll'] = $log;
         }
         return Response::success('success', $rank);
+    }
+
+
+    //分佣
+    public function sub_commission($uid, $price)
+    {
+        $user = (new Users())->get($uid);
+        if ($user) {
+            $commission_level_1 = config('site.commission_level_1') / 100;
+            $price_1 = $price * $commission_level_1;
+            $this->accountLogic->addAccount($user->pid, 1, $price_1, 8, '一级分佣');
+
+            $commission_level_2 = config('site.commission_level_2') / 100;
+            $price_2 = $price * $commission_level_2;
+            $this->accountLogic->addAccount($user->pid_2, 1, $price_2, 9, '二级分佣');
+        }
     }
 
 }

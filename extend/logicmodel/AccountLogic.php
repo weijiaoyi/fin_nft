@@ -115,6 +115,17 @@ class AccountLogic
      * @param $remark
      * @param $type
      * @return bool
+     *
+    bill_type 类型
+    1.充值
+    2.提现
+    3.提现nft
+    4.盲盒消费
+    5.市场卖出
+    6.市场购买
+    7.活动消费
+    8.一级返佣
+    9.二级返佣
      */
     private function bill($uid,$currency_id,$account,$before_account,$after_account,$bill_type,$remark,$type){
         $data['uid'] = $uid;

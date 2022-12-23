@@ -122,7 +122,7 @@ class GoodsLogic
     {
         $where['g.id'] = $id;
         $where['g.is_del'] = 0;
-        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.is_chip,gr.image,g.image as image_chip';
+        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.is_chip,gr.image,g.image as image_chip,g.sell_type,g.duration,specify_uid  ';
         $data = $this->goodsData->alias('g')
             ->join('goods_rank gr', 'g.level = gr.id','LEFT')
             ->where($where)
@@ -156,28 +156,23 @@ class GoodsLogic
      */
     public function apply($uid, $id)
     {
-        $count = $this->ordersData->where(['buy_uid' => $uid, 'status' => 1])->count();
-        if ($count >= 20) return Response::fail('您的待付款订单已达上限');
+        //$count = $this->ordersData->where(['buy_uid' => $uid, 'status' => 1])->count();
+        //if ($count >= 20) return Response::fail('您的待付款订单已达上限');
         $goodsInfo = $this->goodsData->where(['is_del' => 0, 'is_show' => 1, 'id' => $id])->find();
         if (empty($goodsInfo)) return Response::fail('商品信息错误');
         $goods_type = $goodsInfo['type'];
-        if ($goods_type == 1) {
-            //单品购买  盲盒不用管是否售罄
-            if ($goodsInfo['is_manghe'] == 0 && $goodsInfo['surplus'] <= 0) return Response::fail('当前藏品已售罄');
-            $goods_id = $goodsInfo['id'];
-            $price = $goodsInfo['price'];
-            $goods_config_id = 0;
-        } else {
-            $info = $this->goodsConfigData
-                ->where(['is_show' => 1, 'is_del' => 0, 'goods_id' => $id, 'surplus' => ['>', 0]])
-                ->orderRaw('rand()')
-                ->limit(1)
-                ->find();
-            if (empty($info)) return Response::fail('抢购失败');
-            $goods_id = $info['combination_goods_id'];
-            $price = $goodsInfo['price'];
-            $goods_config_id = $info['id'];
+        //单品购买  盲盒不用管是否售罄
+        if ($goodsInfo['is_manghe'] == 0 && $goodsInfo['surplus'] <= 0) return Response::fail('当前藏品已售罄');
+
+        if($goodsInfo['sell_type']==2){//竞价
+            return Response::fail('商品信息错误');
+        }else if($goodsInfo['sell_type']==3 && $uid!=$goodsInfo['specify_uid']){//指定人购买
+            return Response::fail('您不是指定人，无法购买');
         }
+
+        $goods_id = $goodsInfo['id'];
+        $price = $goodsInfo['price'];
+        $goods_config_id = 0;
         $time = date('Y-m-d H:i:s');
         $goods_number = uniqueNum();
         $goods['uid'] = 1;
@@ -185,34 +180,15 @@ class GoodsLogic
         $goods['goods_number'] = $goods_number;
         $goods['price'] = $price;
         $goods['create_time'] = $time;
-        $goods['status'] = 3;
+        $goods['status'] = 2;
         Db::startTrans();
-        // 如果是盲盒 则添加到 用户盲盒表中
-        if ($goodsInfo['is_manghe'] == 1) {
-            $currentTime = time();
-            $goods_manghe_number = uniqueNum();
-            $goodsManghe['user_id'] = $uid;
-            $goodsManghe['goods_id'] = $goods_id;
-            $goodsManghe['goods_number'] = $goods_manghe_number;
-            $goodsManghe['status'] = 1;
-            $goodsManghe['createtime'] = $currentTime;
-            $goodsManghe['updatetime'] = $currentTime;
-            $goodsMangheUsersData = new GoodsMangheUsers();
-            $goods_manghe_users_id = $goodsMangheUsersData->insertGetId($goodsManghe);
-            if (!$goods_manghe_users_id) {
-                Db::rollback();
-                return Response::fail('拍品信息错误');
-            }
-            $goods_users_id = "";
-        } else {
-            $goodsUsersData = new GoodsUsers();
-            $goods_users_id = $goodsUsersData->insertGetId($goods);
-            if (!$goods_users_id) {
-                Db::rollback();
-                return Response::fail('拍品信息错误');
-            }
-            $goods_manghe_users_id = "";
+        $goodsUsersData = new GoodsUsers();
+        $goods_users_id = $goodsUsersData->insertGetId($goods);
+        if (!$goods_users_id) {
+            Db::rollback();
+            return Response::fail('拍品信息错误');
         }
+        $goods_manghe_users_id = "";
         //生成拍品信息，生成订单
         $order_num = uniqueNum();
         $order['goods_users_id'] = $goods_users_id;
@@ -238,15 +214,8 @@ class GoodsLogic
             return Response::fail('订单生成失败');
         }
         Db::commit();
-        if ($goodsInfo['is_manghe'] == 0) {
-            //非盲盒
-            $this->goodsData->where(['id' => $id])->setDec('surplus', 1);
-            $this->goodsData->where(['id' => $id])->setInc('sales', 1);
-            if ($goods_type == 2 && $goods_config_id > 0) {
-                $this->goodsConfigData->where(['id' => $goods_config_id])->setDec('surplus', 1);
-                $this->goodsConfigData->where(['id' => $goods_config_id])->setInc('sales', 1);
-            }
-        }
+        $this->goodsData->where(['id' => $id])->setDec('surplus', 1);
+        $this->goodsData->where(['id' => $id])->setInc('sales', 1);
         return Response::success('购买成功', ['order_id' => $order_id, 'order_num' => $order_num, 'time' => 300]);
     }
 
@@ -271,128 +240,58 @@ class GoodsLogic
         $uid = $userInfo['id'];
         $info = $this->ordersData->where(['buy_uid' => $uid, 'id' => $order_id, 'status' => 1])->find();
         if (empty($info)) return Response::fail('订单信息错误');
-
         $price = $info['price'];
-
         $time = date('Y-m-d H:i:s');
-        if ($pay_type == 1) {
-            //判断是否是盲盒支付
-            if ($info['order_type'] == 3) {
-                Db::startTrans();
-                $accountLogic = new AccountLogic();
-                $result = $accountLogic->subAccount($uid, 1, $price, '购买盲盒', '购买盲盒');
-                if (!$result) {
-                    Db::rollback();
-                    return Response::fail('余额不足');
-                }
-                $goodsMangheUsersData = new GoodsMangheUsers();
-                $result = $goodsMangheUsersData->where(['id' => $info['goods_manghe_users_id']])->update(['status' => 2]);
-                if (!$result) {
-                    Db::rollback();
-                    return Response::fail('订单支付失败');
-                }
-                $result = $this->ordersData->updateByWhere(['id' => $order_id], ['pay_time' => $time, 'status' => 2, 'pay_type' => $pay_type]);
-                if ($result) {
-                    Db::commit();
+        Db::startTrans();
+        $accountLogic = new AccountLogic();
 
-                    // clrTODO 区块链转移
-                    $haixiaLogic = new HaixiaLogic();
-                    $haixiaLogic->transactionGood($info['id'], $result);
+        $goodsUsersData = new GoodsUsers();
 
-                    return Response::success('支付成功');
-                }
+        $result = $accountLogic->subAccount($uid, 1, $price, 5,'市场购买');
+        if (!$result) {
+            Db::rollback();
+            return Response::fail('余额不足');
+        }
+        if($info['goods_users_id']!=0) {
+            $result = $accountLogic->addAccount($info['sale_uid'], 1, $price, 6, '市场卖出');
+            if (!$result) {
                 Db::rollback();
                 return Response::fail('订单支付失败');
-            } else {
-                Db::startTrans();
-                $accountLogic = new AccountLogic();
-                $result = $accountLogic->subAccount($uid, 1, $price, '购买藏品', '购买藏品');
-                if (!$result) {
-                    Db::rollback();
-                    return Response::fail('余额不足');
-                }
-                $result = $accountLogic->addAccount($info['sale_uid'], 1, $price, '出售藏品', '出售藏品');
-                if (!$result) {
-                    Db::rollback();
-                    return Response::fail('订单支付失败');
-                }
-                $goodsUsersData = new GoodsUsers();
-                $result = $goodsUsersData->where(['id' => $info['goods_users_id']])->update(['status' => 4]);
-
-                if (!$result) {
-                    Db::rollback();
-                    return Response::fail('订单支付失败');
-                }
-                $result = $this->ordersData->updateByWhere(['id' => $order_id], ['pay_time' => $time, 'status' => 2, 'pay_type' => $pay_type]);
-                if (!$result) {
-                    Db::rollback();
-                    return Response::fail('订单支付失败');
-                }
-                $goods_user_number = $goodsUsersData->where(['goods_id' => $info['goods_id']])->whereNotNull('number')->order('id', 'desc')->value('number');
-                if ($goods_user_number) {
-                    $goods_user_number = str_pad($goods_user_number + 1, 6, '0', STR_PAD_LEFT);
-                } else {
-                    $goods_user_number = '000001';
-                }
-
-                $usersGoods['uid'] = $uid;
-                $usersGoods['goods_id'] = $info['goods_id'];
-                $usersGoods['goods_number'] = $info['goods_num'];
-                $usersGoods['price'] = $price;
-                $usersGoods['create_time'] = $time;
-                $usersGoods['number'] = $goods_user_number;
-                $result = $goodsUsersData->insertGetId($usersGoods);
-                if ($result) {
-                    $this->sub_commission($uid, $price);
-                    Db::commit();
-                    return Response::success('支付成功');
-                }
+            }
+            $result = $goodsUsersData->where(['id' => $info['goods_users_id']])->update(['status' => 4]);
+            if (!$result) {
                 Db::rollback();
                 return Response::fail('订单支付失败');
             }
         }
-        if ($this->redis->getItem('order_' . $uid)) {
-            return Response::fail('频繁申请');
+        $result = $this->ordersData->updateByWhere(['id' => $order_id], ['pay_time' => $time, 'status' => 2, 'pay_type' => $pay_type]);
+        if (!$result) {
+            Db::rollback();
+            return Response::fail('订单支付失败');
         }
-        $this->redis->setItem('order_' . $uid, $uid);
-        $this->redis->settime('order_' . $uid, 5);
-        $order_num = uniqueNum();
-        $body = '藏品支付';
-        if ($info['order_type'] == 3) {
-            $body = '盲盒支付';
+        $goods_user_number = $goodsUsersData->where(['goods_id' => $info['goods_id']])->whereNotNull('number')->order('id', 'desc')->value('number');
+        if ($goods_user_number) {
+            $goods_user_number = str_pad($goods_user_number + 1, 6, '0', STR_PAD_LEFT);
+        } else {
+            $goods_user_number = '000001';
         }
-        switch ($pay_type) {
-            case 2:
-                $pay = (new AliLogic())->appPay($order_num, $body, $info['price']);
-                break;
-            case 3:
-                $pay = (new WxLogic())->appPay($order_num, $body, $info['price']);
-                break;
-            case 4:
-                $pay = (new AliLogic())->wapPay($order_num, $body, $info['price']);
-                break;
-            case 5:
-                $pay = (new WxLogic())->webPay($order_num, $body, $info['price']);
-                break;
-            case 6:
-                if ($userInfo['wx_small_auth'] == 0) return Response::fail('请先进行授权');
-                $pay = (new WxLogic())->smallPay($order_num, $body, $info['price'], $userInfo['wx_small_openid']);
-                break;
-            case 7:
-                $pay = (new AliLogic())->webPay($order_num, $body, $info['price']);
-                break;
-            default:
-                $pay = false;
-                break;
+        $goods = Goods::find($info['goods_id']);
+        $usersGoods['uid'] = $uid;
+        $usersGoods['goods_id'] = $info['goods_id'];
+        $usersGoods['goods_number'] = $info['goods_num'];
+        $usersGoods['price'] = $price;
+        $usersGoods['create_time'] = $time;
+        $usersGoods['number'] = $goods_user_number;
+        $usersGoods['part'] = $goods['part'];
+        $usersGoods['level'] = $goods['level'];
+        $result = $goodsUsersData->insertGetId($usersGoods);
+        if ($result) {
+            //$this->sub_commission($uid, $price);
+            Db::commit();
+            return Response::success('支付成功');
         }
-        if ($pay !== false) {
-            $result = $this->ordersData->updateByWhere(['id' => $order_id], ['pay_type' => $pay_type, 'order_num' => $order_num]);
-            if ($result) {
-                return Response::success('下单成功', ['pay' => $pay]);
-            }
-        }
-        return Response::fail('支付失败');
-
+        Db::rollback();
+        return Response::fail('订单支付失败');
     }
 
 
@@ -665,7 +564,7 @@ class GoodsLogic
     }
 
     /**
-     * 出售藏品
+     * 市场卖出
      * @param $uid
      * @param $id
      * @param $price

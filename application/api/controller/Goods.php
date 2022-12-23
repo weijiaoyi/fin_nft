@@ -120,4 +120,5 @@ class Goods extends Controller
     public function memberGoodsRecord($goods_number){
         return json($this->goodsLogic->memberGoodsRecord($goods_number));
     }
+
 }
