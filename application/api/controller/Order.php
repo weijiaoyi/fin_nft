@@ -32,6 +32,36 @@ class Order extends BaseController
         return json($this->goodsLogic->apply($this->uid, $id));
     }
 
+    /**竞价
+     * @param $id
+     * @return \think\response\Json
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @throws \think\exception\PDOException
+     */
+    public function bidding($id=0,$price=0)
+    {
+        return json($this->goodsLogic->bidding($this->uid, $id,$price));
+    }
+
+    /**
+     * 竞价历史
+     * @param $id
+     * @param int $page
+     * @param int $pagesize
+     * @return \think\response\Json
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function biddingList($id,$page=1,$pagesize=10)
+    {
+        return json($this->goodsLogic->biddingList($id,$page,$pagesize));
+    }
+
     /**
      * 支付
      * @param $order_id

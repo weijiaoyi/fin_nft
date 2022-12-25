@@ -216,7 +216,74 @@ class GoodsLogic
         Db::commit();
         $this->goodsData->where(['id' => $id])->setDec('surplus', 1);
         $this->goodsData->where(['id' => $id])->setInc('sales', 1);
-        return Response::success('购买成功', ['order_id' => $order_id, 'order_num' => $order_num, 'time' => 300]);
+        return Response::success('购买成功', ['order_id' => $order_id, 'order_num' => $order_num]);
+    }
+
+    /**
+     * 竞价
+     * @param $uid
+     * @param $id
+     * @return array
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function bidding($uid, $id,$price)
+    {
+        if($id==0 || $price==0){//竞价
+            return Response::invalidParam();
+        }
+        $goodsInfo = $this->goodsData->where(['is_del' => 0, 'is_show' => 1, 'id' => $id])->find();
+        if (empty($goodsInfo)) return Response::fail('商品信息错误');
+        if ($goodsInfo['status'] !=1) return Response::fail('当前藏品已售罄');
+        if($goodsInfo['sell_type']!=2){//竞价
+            return Response::fail('商品信息错误');
+        }
+        $goods_id = $goodsInfo['id'];
+        $bidding_step = config('site.bidding_step');//最低加价数
+        Db::startTrans();
+        $gBidding = $this->ordersData->where('goods_id',$goods_id)->order('price','desc')->find();
+        if($gBidding){
+            if($price<$gBidding->price+$bidding_step){
+                return Response::fail('竞价价格低于当前价');
+            }
+        }
+        $accountLogic = new AccountLogic();
+        $result = $accountLogic->subAccount($uid, 1, $price, 10, '竞价');
+        if (!$result) {
+            Db::rollback();
+            return Response::fail('余额不足');
+        }
+
+        //改为竞拍失败
+        $this->ordersData->where(['goods_id' => $goods_id])->where(['order_type' => 4])->setField('status',4);
+        $goods_manghe_users_id = "";
+        //生成拍品信息，生成订单
+        $order_num = uniqueNum();
+        $order['goods_users_id'] = 0;
+        $order['goods_manghe_users_id'] = $goods_manghe_users_id;
+        $order['order_num'] = $order_num;
+        $order['goods_num'] =  uniqueNum();
+        $order['goods_id'] = $goods_id;
+        $order['sale_uid'] = 1;
+        $order['buy_uid'] = $uid;
+        $order['price'] = $price;
+        $order['pay_type'] = 1;
+        $order['status'] = 3;
+        $order['create_time'] = date('Y-m-d H:i:s');
+        $order['pay_end_time'] = $order['create_time'];
+        $order['goods_config_id'] = 0;
+        $order['buy_goods_id'] = $id;
+        $order['order_type'] = 4;
+        $order_id = $this->ordersData->insertGetId($order);
+        if (!$order_id) {
+            Db::rollback();
+            return Response::fail('订单生成失败');
+        }
+        Db::commit();
+        $this->goodsData->where(['id' => $id])->setInc('sales', 1);
+        return Response::success('竞价成功');
     }
 
 
@@ -938,5 +1005,33 @@ class GoodsLogic
 
     }
 
+    /**
+     * 竞价历史
+     * @param $id
+     * @param int $page
+     * @param int $pagesize
+     * @return array
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function biddingList($id, int $page, int $pagesize)
+    {
+        $where['o.buy_goods_id'] = $id;
+        $count = $this->ordersData
+            ->alias('o')
+            //->join('users u', 'o.buy_uid = u.id')
+            ->where($where)
+            ->count();
+        $data = $this->ordersData->alias('o')
+            ->join('users u', 'o.buy_uid = u.id')
+            ->where($where)
+            ->order(['o.id desc'])
+            ->page($page, $pagesize)
+            ->field(['o.price', 'u.nick_name'])
+            ->select();
+        return Response::success('success', ['count' => $count, 'data' => $data, 'page' => $page, 'pagesize' => $pagesize]);
+    }
 
 }

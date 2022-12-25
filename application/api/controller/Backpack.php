@@ -196,7 +196,16 @@ class Backpack extends BaseController
         return  json( Response::success('获取成功', $data));
     }
 
-
+    /**
+     * 合成
+     * @param $level
+     * @param $number
+     * @return \think\response\Json
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     public function synthesis($level,$number){
         $goodsUser =  new GoodsUsers();
         $arr = [];
