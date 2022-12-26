@@ -21,7 +21,7 @@ class Staking extends BaseController
         if($mining_pool_id==0 || $number==0 ||  $level==0){
             return json( Response::fail('参数错误'));
         }
-        $stak =  new Staking();
+        $stak =  new StakingModel();
         $goodsUser =  new GoodsUsers();
         $user_number = $goodsUser->alias('gu')
             ->join('goods g', 'gu.goods_id = g.id','LEFT')
@@ -46,7 +46,7 @@ class Staking extends BaseController
         $add['create_time'] = date('Y-m-d H:i:s');
         $add['start_at'] = date("Y-m-d",strtotime("+1 day"));
         $stak->insert($add);
-        $goodsUser->where('uid',$this->uid)->where('status',1)->order('id','asc')->limit($number)->save(['status'=>5]);
+        $goodsUser->where('uid',$this->uid)->where('status',1)->order('id','asc')->limit($number)->update(['status'=>5]);
         Db::commit();
         return json(Response::success('质押成功'));
     }
