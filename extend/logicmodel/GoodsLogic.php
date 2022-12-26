@@ -160,30 +160,40 @@ class GoodsLogic
         //if ($count >= 20) return Response::fail('您的待付款订单已达上限');
         $goodsInfo = $this->goodsData->where(['is_del' => 0, 'is_show' => 1, 'id' => $id])->find();
         if (empty($goodsInfo)) return Response::fail('商品信息错误');
-        $goods_type = $goodsInfo['type'];
         //单品购买  盲盒不用管是否售罄
-        if ($goodsInfo['is_manghe'] == 0 && $goodsInfo['surplus'] <= 0) return Response::fail('当前藏品已售罄');
+        if ($goodsInfo['is_manghe'] == 0 && $goodsInfo['surplus'] <= 0) return Response::fail('当前产品已售罄');
 
         if($goodsInfo['sell_type']==2){//竞价
-            return Response::fail('商品信息错误');
+            return Response::fail('竞价产品，购买入口错误');
         }else if($goodsInfo['sell_type']==3 && $uid!=$goodsInfo['specify_uid']){//指定人购买
             return Response::fail('您不是指定人，无法购买');
         }
-
+        $goodsUsersData = new GoodsUsers();
+        $goodsUser = $goodsUsersData::find($goodsInfo['goods_user_id']);
+        $sale_uid = $goodsUser ? $goodsUser['uid'] : 0;
         $goods_id = $goodsInfo['id'];
         $price = $goodsInfo['price'];
         $goods_config_id = 0;
         $time = date('Y-m-d H:i:s');
+
         $goods_number = uniqueNum();
-        $goods['uid'] = 1;
-        $goods['goods_id'] = $goods_id;
+        $goods_user_number = $goodsUsersData->where(['goods_id' => $id])->whereNotNull('number')->order('id', 'desc')->value('number');
+        if ($goods_user_number) {
+            $goods_user_number = str_pad($goods_user_number + 1, 6, '0', STR_PAD_LEFT);
+        } else {
+            $goods_user_number = '000001';
+        }
         $goods['goods_number'] = $goods_number;
-        $goods['price'] = $price;
-        $goods['create_time'] = $time;
-        $goods['status'] = 2;
+        $usersGoods['uid'] = $uid;
+        $usersGoods['goods_id'] = $id;
+        $usersGoods['price'] = $price;
+        $usersGoods['create_time'] = $time;
+        $usersGoods['number'] = $goods_user_number;
+        $usersGoods['part'] = $goodsInfo['part'];
+        $usersGoods['level'] = $goodsInfo['level'];
+
         Db::startTrans();
-        $goodsUsersData = new GoodsUsers();
-        $goods_users_id = $goodsUsersData->insertGetId($goods);
+        $goods_users_id = $goodsUsersData->insertGetId($usersGoods);
         if (!$goods_users_id) {
             Db::rollback();
             return Response::fail('拍品信息错误');
@@ -196,27 +206,43 @@ class GoodsLogic
         $order['order_num'] = $order_num;
         $order['goods_num'] = $goods_number;
         $order['goods_id'] = $goods_id;
-        $order['sale_uid'] = 1;
+        $order['sale_uid'] = $sale_uid;
         $order['buy_uid'] = $uid;
         $order['price'] = $price;
-        $order['status'] = 1;
-        $order['create_time'] = date('Y-m-d H:i:s');
+        $order['status'] = 2;
+        $order['pay_type'] = 1;
+        $order['create_time'] = $time;
         $order['pay_end_time'] = date('Y-m-d H:i:s', strtotime("+10 minutes"));
         $order['goods_config_id'] = $goods_config_id;
         $order['buy_goods_id'] = $id;
-        //是否是盲盒购买
-        if ($goodsInfo['is_manghe'] == 1) {
-            $order['order_type'] = 3;
-        }
+
         $order_id = $this->ordersData->insertGetId($order);
         if (!$order_id) {
             Db::rollback();
             return Response::fail('订单生成失败');
         }
-        Db::commit();
         $this->goodsData->where(['id' => $id])->setDec('surplus', 1);
         $this->goodsData->where(['id' => $id])->setInc('sales', 1);
-        return Response::success('购买成功', ['order_id' => $order_id, 'order_num' => $order_num]);
+        $accountLogic = new AccountLogic();
+        $result = $accountLogic->subAccount($uid, 1, $price, 5,'市场购买');
+        if (!$result) {
+            Db::rollback();
+            return Response::fail('余额不足');
+        }
+        if($sale_uid!=0) {
+            $result = $accountLogic->addAccount($sale_uid, 1, $price, 6, '市场卖出');
+            if (!$result) {
+                Db::rollback();
+                return Response::fail('订单支付失败');
+            }
+            $result = $goodsUsersData->where(['id' => $goodsInfo['goods_users_id']])->update(['status' => 3]);//已出售
+            if (!$result) {
+                Db::rollback();
+                return Response::fail('订单支付失败');
+            }
+        }
+        Db::commit();
+        return Response::success('支付成功');
     }
 
     /**

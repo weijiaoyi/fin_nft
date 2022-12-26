@@ -30,7 +30,10 @@ class GoodsUsers extends Model
     public static function offShelve($id,$uid)
     {
         Db::startTrans();
-
+        $order_num = Orders::where('buy_goods_id',$id)->count();
+        if($order_num>0){
+            return Response::fail('不可下架');
+        }
         $gu = self::where('id',$id)->where('uid',$uid)->find();
         if($gu['status']!=2){
             return Response::fail('不可下架');
