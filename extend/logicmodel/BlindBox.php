@@ -387,6 +387,7 @@ class BlindBox
                         $usersGoods['part'] = $winInfo['part'];
                         $usersGoods['level'] = $winInfo['level'];
                         $usersGoods['number'] = $goods_user_number;
+                        $usersGoods['source'] = 1;
                         $usersGoodsArr[] = $usersGoods;
                     }
                 }
