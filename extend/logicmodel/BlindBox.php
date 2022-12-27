@@ -417,17 +417,17 @@ class BlindBox
         }
         foreach ($rank as &$vo){
             $log = GoodsUsers::alias('r')
-                ->join('users u', 'r.uid = u.id')
-                ->field('u.nick_name,g.level,r.part,\'/uploads/base/headicon.png\' as head_img')
+                ->join('users u', 'r.uid = u.id','LEFT')
+                ->field('u.nick_name,r.level,r.part,\'/uploads/base/headicon.png\' as head_img')
                 ->where('r.source',1)
-                ->where('g.level',$vo['id'])
+                ->where('r.level',$vo['id'])
                 ->limit(10)
                 ->order('r.id','desc')
                 ->select();
             if(count($log)==0){
                 $level = $vo['id'];
                 $log = GoodsUsers::alias('r')
-                    ->join('users u', 'r.uid = u.id')
+                    ->join('users u', 'r.uid = u.id','LEFT')
                     ->field("u.nick_name, $level as level,r.part,'/uploads/base/headicon.png' as head_img")
                     ->where('r.source',1)
                     ->orderRaw('rand()')
