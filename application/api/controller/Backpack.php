@@ -106,7 +106,7 @@ class Backpack extends BaseController
     public function sell($id=0,$sell_type = 1,$price=0,$specify_ui=0,$time=24){
         if($id==0 || $price<=0 ){
             Db::rollback();
-            return json( Response::fail('参数异常'));
+            return json(Response::invalidParam());
         }
          Db::startTrans();
             $goodsUser = GoodsUsers::where(['uid'=>$this->uid,'id'=>$id])->find();

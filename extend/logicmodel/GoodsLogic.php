@@ -160,7 +160,7 @@ class GoodsLogic
         //$count = $this->ordersData->where(['buy_uid' => $uid, 'status' => 1])->count();
         //if ($count >= 20) return Response::fail('您的待付款订单已达上限');
         if($id==0 || empty($pay_password)){
-            return Response::fail('参数错误');
+            return Response::invalidParam();
         }
         $password = md5(md5($pay_password) . $userInfo['pay_salt']);
         if(empty($userInfo['pay_password'])){
@@ -272,11 +272,8 @@ class GoodsLogic
      */
     public function bidding($userInfo, $id,$price,$pay_password)
     {
-        if($id==0 || $price==0){//竞价
+        if($id==0 || $price==0 || empty($pay_password)){
             return Response::invalidParam();
-        }
-        if($id==0 || empty($pay_password)){
-            return Response::fail('参数错误');
         }
         $password = md5(md5($pay_password) . $userInfo['pay_salt']);
         $uid = $userInfo['id'];

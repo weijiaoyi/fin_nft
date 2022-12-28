@@ -24,7 +24,7 @@ class Buy extends BaseController
         $level = $request->post('level',0);
         $part = $request->post('part',0);
         if(empty($describe) || $level==0 ){
-            return json(Response::fail('参数错误'));
+            return json(Response::invalidParam());
         }
         return json(BuyModel::publish($describe,$level,$part,$contact,$this->uid));
     }

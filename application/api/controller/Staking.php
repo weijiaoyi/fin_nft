@@ -19,7 +19,7 @@ class Staking extends BaseController
     public function staking($mining_pool_id=0,$number=1,$level=0)
     {
         if($mining_pool_id==0 || $number==0 ||  $level==0){
-            return json( Response::fail('参数错误'));
+            return json(Response::invalidParam());
         }
         $stak =  new StakingModel();
         $goodsUser =  new GoodsUsers();
