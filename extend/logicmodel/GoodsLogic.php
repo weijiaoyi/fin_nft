@@ -76,7 +76,7 @@ class GoodsLogic
         if (!empty($search)) $where['g.name|g.label'] = ['like', '%' . $search . '%'];
         $count = $this->goodsData->alias('g')->where($where)->count();
         if ($count <= 0) return Response::success('暂无数据', ['count' => $count, 'data' => [], 'page' => $page, 'pagesize' => $pagesize]);
-        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.is_chip,gr.image,g.image as image_chip';
+        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.is_chip,gr.image,g.image as image_chip,g.sell_type,';
         $data = $this->goodsData->alias('g')
             ->join('goods_rank gr', 'g.level = gr.id','LEFT')
             ->where($where)
@@ -122,7 +122,7 @@ class GoodsLogic
     {
         $where['g.id'] = $id;
         $where['g.is_del'] = 0;
-        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.is_chip,gr.image,g.image as image_chip,g.sell_type,g.duration,specify_uid  ';
+        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.is_chip,gr.image,g.image as image_chip,g.sell_type,g.duration,specify_uid ';
         $data = $this->goodsData->alias('g')
             ->join('goods_rank gr', 'g.level = gr.id','LEFT')
             ->where($where)
@@ -270,10 +270,21 @@ class GoodsLogic
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function bidding($uid, $id,$price)
+    public function bidding($userInfo, $id,$price,$pay_password)
     {
         if($id==0 || $price==0){//竞价
             return Response::invalidParam();
+        }
+        if($id==0 || empty($pay_password)){
+            return Response::fail('参数错误');
+        }
+        $password = md5(md5($pay_password) . $userInfo['pay_salt']);
+        $uid = $userInfo['id'];
+        if(empty($userInfo['pay_password'])){
+            return Response::fail('请先设置支付密码');
+        }
+        if($password!=$userInfo['pay_password']){
+            return Response::fail('支付密码错误');
         }
         $goodsInfo = $this->goodsData->where(['is_del' => 0, 'is_show' => 1, 'id' => $id])->find();
         if (empty($goodsInfo)) return Response::fail('商品信息错误');

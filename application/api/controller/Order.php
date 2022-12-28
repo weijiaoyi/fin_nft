@@ -41,9 +41,9 @@ class Order extends BaseController
      * @throws \think\exception\DbException
      * @throws \think\exception\PDOException
      */
-    public function bidding($id=0,$price=0)
+    public function bidding($id=0,$price=0,$pay_password='')
     {
-        return json($this->goodsLogic->bidding($this->uid, $id,$price));
+        return json($this->goodsLogic->bidding($this->userInfo, $id,$price,$pay_password));
     }
 
     /**
