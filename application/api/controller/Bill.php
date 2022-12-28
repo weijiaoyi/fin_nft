@@ -28,7 +28,7 @@ class Bill extends BaseController
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function  billList($start_time,$end_time,$page=1,$pagesize=10){
+    public function  billList($start_time='',$end_time='',$page=1,$pagesize=10){
         return json($this->billLogic->billList($this->uid,$start_time,$end_time,$page,$pagesize));
     }
 
