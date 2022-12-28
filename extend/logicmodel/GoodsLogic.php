@@ -154,7 +154,7 @@ class GoodsLogic
      * @throws \think\exception\DbException
      * @throws \think\exception\PDOException
      */
-    public function apply($userInfo, $id,$pay_password)
+    public function apply($userInfo, $id,$pay_password,$number)
     {
         $uid = $userInfo['id'];
         //$count = $this->ordersData->where(['buy_uid' => $uid, 'status' => 1])->count();
@@ -186,25 +186,28 @@ class GoodsLogic
         $price = $goodsInfo['price'];
         $goods_config_id = 0;
         $time = date('Y-m-d H:i:s');
-
-        $goods_number = uniqueNum();
-        $goods_user_number = $goodsUsersData->where(['goods_id' => $id])->whereNotNull('number')->order('id', 'desc')->value('number');
-        if ($goods_user_number) {
-            $goods_user_number = str_pad($goods_user_number + 1, 6, '0', STR_PAD_LEFT);
-        } else {
-            $goods_user_number = '000001';
+        $usersGoodsArr = [];
+        for($i=0;$i<$number;$i++) {
+            $goods_number = uniqueNum();
+            $goods_user_number = $goodsUsersData->where(['goods_id' => $id])->whereNotNull('number')->order('id', 'desc')->value('number');
+            if ($goods_user_number) {
+                $goods_user_number = str_pad($goods_user_number + 1, 6, '0', STR_PAD_LEFT);
+            } else {
+                $goods_user_number = '000001';
+            }
+            $goods['goods_number'] = $goods_number;
+            $usersGoods = [];
+            $usersGoods['uid'] = $uid;
+            $usersGoods['goods_id'] = $id;
+            $usersGoods['price'] = $price;
+            $usersGoods['create_time'] = $time;
+            $usersGoods['number'] = $goods_user_number;
+            $usersGoods['part'] = $goodsInfo['part'];
+            $usersGoods['level'] = $goodsInfo['level'];
+            $usersGoodsArr[]=$usersGoods;
         }
-        $goods['goods_number'] = $goods_number;
-        $usersGoods['uid'] = $uid;
-        $usersGoods['goods_id'] = $id;
-        $usersGoods['price'] = $price;
-        $usersGoods['create_time'] = $time;
-        $usersGoods['number'] = $goods_user_number;
-        $usersGoods['part'] = $goodsInfo['part'];
-        $usersGoods['level'] = $goodsInfo['level'];
-
         Db::startTrans();
-        $goods_users_id = $goodsUsersData->insertGetId($usersGoods);
+        $goods_users_id = $goodsUsersData->insertAll($usersGoodsArr);
         if (!$goods_users_id) {
             Db::rollback();
             return Response::fail('拍品信息错误');
@@ -219,13 +222,14 @@ class GoodsLogic
         $order['goods_id'] = $goods_id;
         $order['sale_uid'] = $sale_uid;
         $order['buy_uid'] = $uid;
-        $order['price'] = $price;
+        $order['price'] = $price*$number;
         $order['status'] = 2;
         $order['pay_type'] = 1;
         $order['create_time'] = $time;
         $order['pay_end_time'] = date('Y-m-d H:i:s', strtotime("+10 minutes"));
         $order['goods_config_id'] = $goods_config_id;
         $order['buy_goods_id'] = $id;
+        $order['number'] = $number;
 
         $order_id = $this->ordersData->insertGetId($order);
         if (!$order_id) {

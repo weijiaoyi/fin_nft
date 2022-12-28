@@ -27,9 +27,9 @@ class Order extends BaseController
      * @throws \think\exception\DbException
      * @throws \think\exception\PDOException
      */
-    public function apply($id=0,$pay_password='')
+    public function apply($id=0,$pay_password='',$number=1)
     {
-        return json($this->goodsLogic->apply($this->userInfo, $id,$pay_password));
+        return json($this->goodsLogic->apply($this->userInfo, $id,$pay_password,$number));
     }
 
     /**竞价
