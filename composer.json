@@ -38,7 +38,9 @@
         "overtrue/wechat": "~4.0",
         "chesterlyd/ethereum-client": "dev-main",
         "yansongda/pay": "v2.x-dev",
-        "tencentcloud/tencentcloud-sdk-php": "dev-master"
+        "tencentcloud/tencentcloud-sdk-php": "dev-master",
+        "bitwasp/bitcoin": "1.0.x-dev",
+        "web3p/ethereum-util": "dev-master"
     },
     "config": {
         "preferred-install": "dist",

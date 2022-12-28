@@ -6,6 +6,12 @@ namespace logicmodel;
 
 use app\admin\model\Bill;
 use app\lib\exception\Jwt;
+use BitWasp\Bitcoin\Bitcoin;
+use BitWasp\Bitcoin\Crypto\Random\Random;
+use BitWasp\Bitcoin\Key\Factory\HierarchicalKeyFactory;
+use BitWasp\Bitcoin\Mnemonic\Bip39\Bip39Mnemonic;
+use BitWasp\Bitcoin\Mnemonic\Bip39\Bip39SeedGenerator;
+use BitWasp\Bitcoin\Mnemonic\MnemonicFactory;
 use comservice\GetRedis;
 use comservice\Response;
 use datamodel\Feedback;
@@ -17,6 +23,7 @@ use logicmodel\award\Recommend;
 use think\Db;
 use think\Env;
 use think\Request;
+use Web3p\EthereumUtil\Util;
 
 class UserLogic
 {
@@ -682,8 +689,15 @@ class UserLogic
             $redis = GetRedis::getRedis();
             $redis->setItem($jwt, $userInfo['id']);
             $nick_name= 'sp_' . rand(111111, 999999);
-            $uuid = uuid();
-            $this->usersData->updateByWhere(['id' => $userInfo['id']],['uuid'=>$uuid,'nick_name'=>$nick_name,'app_token' => $jwt,'nonce'=>$nonce, 'login_time' => date('Y-m-d H:i:s')]);
+            $account = $this->getAccountAddress();
+            if ($account === false) return Response::fail('地址生成失败');
+            $account['uuid'] =  uuid();
+            $account['nick_name'] = $nick_name;
+            $account['uuid'] = 'sp_' . rand(111111, 999999);
+            $account['app_token'] = $jwt;
+            $account['nonce'] = $nonce;
+            $account['login_time'] = date('Y-m-d H:i:s');
+            $this->usersData->updateByWhere(['id' => $userInfo['id']],$account);
             return Response::success('授权成功', ['app_token' => $jwt]);
         } else {
             return Response::fail('授权失败');
@@ -691,6 +705,51 @@ class UserLogic
 
     }
 
+    private function getAccountAddress(){
+        // Bip39
+        $math = Bitcoin::getMath();
+        $network = Bitcoin::getNetwork();
+        $random = new Random();
+        // 生成随机数(initial entropy)
+        $entropy = $random->bytes(Bip39Mnemonic::MIN_ENTROPY_BYTE_LEN);
+        $bip39 = MnemonicFactory::bip39();
+        // 通过随机数生成助记词
+        $mnemonic = $bip39->entropyToMnemonic($entropy);
+
+        $seedGenerator = new Bip39SeedGenerator();
+        // 通过助记词生成种子，传入可选加密串'hello'
+        $seed = $seedGenerator->getSeed($mnemonic, 'fin_nft');
+       // echo "seed: " . $seed->getHex() . PHP_EOL;
+        $hdFactory = new HierarchicalKeyFactory();
+        $master = $hdFactory->fromEntropy($seed);
+        // 私钥
+       // echo "master private key: " . $master->getPrivateKey()->getHex().PHP_EOL;
+        // 公钥
+      //  echo "master public key: " . $master->getPublicKey()->getHex().PHP_EOL.PHP_EOL;
+        $util = new Util();
+        // 设置路径account
+        try {
+            $hardened = $master->derivePath("44'/60'/0/0/0");
+            $erc_privateKey = $hardened->getPrivateKey()->getHex();
+            $erc_address = $util->publicKeyToAddress($util->privateKeyToPublicKey($erc_privateKey));
+
+            $hardened = $master->derivePath("44'/60'/1/0/0");
+            $trc_privateKey = $hardened->getPrivateKey()->getHex();
+            $trc_address = $util->publicKeyToAddress($util->privateKeyToPublicKey($trc_privateKey));
+
+            $hardened = $master->derivePath("44'/60'/2/0/0");
+            $bsc_privateKey = $hardened->getPrivateKey()->getHex();
+            $bsc_address = $util->publicKeyToAddress($util->privateKeyToPublicKey($bsc_privateKey));
+
+            return  [
+                'erc_wallet_address'=>$erc_address,'erc_private_key'=>$erc_privateKey,
+                'bsc_wallet_address'=>$bsc_address,'bsc_private_key'=>$bsc_privateKey,
+                'trc_wallet_address'=>$trc_address,'trc_private_key'=>$trc_privateKey
+            ];
+        }catch (\Exception $e){
+            return false;
+        }
+    }
     private function verifySignature($message, $signature, $address)
     {
         $msglen = strlen($message);
