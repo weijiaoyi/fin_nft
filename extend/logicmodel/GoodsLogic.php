@@ -76,7 +76,7 @@ class GoodsLogic
         if (!empty($search)) $where['g.name|g.label'] = ['like', '%' . $search . '%'];
         $count = $this->goodsData->alias('g')->where($where)->count();
         if ($count <= 0) return Response::success('暂无数据', ['count' => $count, 'data' => [], 'page' => $page, 'pagesize' => $pagesize]);
-        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.is_chip,gr.image,g.image as image_chip,g.sell_type,';
+        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.is_chip,gr.image,g.image as image_chip,g.sell_type';
         $data = $this->goodsData->alias('g')
             ->join('goods_rank gr', 'g.level = gr.id','LEFT')
             ->where($where)
