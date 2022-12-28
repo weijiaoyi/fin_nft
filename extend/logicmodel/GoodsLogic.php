@@ -212,6 +212,8 @@ class GoodsLogic
             Db::rollback();
             return Response::fail('拍品信息错误');
         }
+
+
         $goods_manghe_users_id = "";
         //生成拍品信息，生成订单
         $order_num = uniqueNum();
@@ -222,7 +224,7 @@ class GoodsLogic
         $order['goods_id'] = $goods_id;
         $order['sale_uid'] = $sale_uid;
         $order['buy_uid'] = $uid;
-        $order['price'] = $price*$number;
+        $order['price'] = bcmul($price,$number,8);
         $order['status'] = 2;
         $order['pay_type'] = 1;
         $order['create_time'] = $time;
@@ -239,16 +241,18 @@ class GoodsLogic
         $this->goodsData->where(['id' => $id])->setDec('surplus', 1);
         $this->goodsData->where(['id' => $id])->setInc('sales', 1);
         $accountLogic = new AccountLogic();
-        $result = $accountLogic->subAccount($uid, 1, $price, 5,'市场购买');
+        $result = $accountLogic->subAccount($uid, 1, $order['price'], 5,'市场购买');
         if (!$result) {
             Db::rollback();
             return Response::fail('余额不足');
         }
         if($sale_uid!=0) {
+            $transaction_fees = config('site.transaction_fees');//交易手续费
+            $price = bcmul($order['price'],100-$transaction_fees,8);
             $result = $accountLogic->addAccount($sale_uid, 1, $price, 6, '市场卖出');
             if (!$result) {
                 Db::rollback();
-                return Response::fail('订单支付失败');
+                return Response::fail('市场卖出失败');
             }
             $result = $goodsUsersData->where(['id' => $goodsInfo['goods_users_id']])->update(['status' => 3]);//已出售
             if (!$result) {

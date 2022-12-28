@@ -50,15 +50,9 @@ class DrawLogic
      * @throws \think\exception\DbException
      * @throws \think\exception\PDOException
      */
-       public function  draw($userInfo,$account,$type){
-           if($type == 1){
-               if($userInfo['is_bank'] == 0) return  Response::fail('请先完善银行卡信息');
-           }elseif($type == 2){
-               if($userInfo['is_ali'] == 0) return  Response::fail('请先完善支付宝信息');
-           }elseif ($type == 3){
-               if($userInfo['is_wx'] == 0) return  Response::fail('请先完善微信信息');
-           }else{
-             return  Response::fail('提现方式错误');
+       public function  draw($userInfo,$account,$type,$currency='',$address=''){
+           if($account==0 || empty($type) || empty($currency)|| empty($address)){
+               return Response::invalidParam();
            }
          $field = ['cd.*','c.name'];
          $currency_id  = 1;
@@ -73,31 +67,25 @@ class DrawLogic
 
          $uid = $userInfo['id'];
          Db::startTrans();
-         $result = (new AccountLogic())->subAccount($uid,$currency_id,$account,'提现','提现');
+         if($currency=='usdt') {
+             $result = (new AccountLogic())->subAccount($uid, $currency_id, $account, 2, '提现');
+         }else{
+             $result = (new AccountLogic())->subFtc($uid, $currency_id, $account, 3, '提现');
+         }
          if($result == false){
              Db::rollback();
              return Response::fail('账户余额不足');
          }
-         $reality_account = bcdiv($account*(100-$config['rate']),100,8);
+         $reality_account = bcdiv($account*(100-$config['rate']),100,2);
          $data['order_num'] = uniqueNum();
          $data['currency_id'] = $currency_id;
          $data['uid'] = $uid;
          $data['account'] = $account;
          $data['reality_account'] = $reality_account;
          $data['type'] = $type;
+         $data['currency'] = $currency;
+         $data['address'] = $address;
          $data['create_time'] = date('Y-m-d H:i:s');
-         if($type == 1){
-             $data['bank_name'] = $userInfo['bank_name'];
-             $data['bank_number'] = $userInfo['bank_number'];
-             $data['bank_owner'] = $userInfo['bank_owner'];
-             $data['bank_branch'] = $userInfo['bank_branch'];
-         }elseif ($type == 2){
-             $data['ali_name'] = $userInfo['ali_name'];
-             $data['ali_image'] = $userInfo['ali_image'];
-         }elseif ($type == 3){
-             $data['wx_name'] = $userInfo['wx_name'];
-             $data['wx_image'] = $userInfo['wx_image'];
-         }
          $result = $this->drawRecordData->saveEntityAndGetId($data);
          if($result){
              Db::commit();
@@ -110,22 +98,25 @@ class DrawLogic
     /**
      * 提现记录
      * @param $uid
-     * @param $status
      * @return array
      * @throws \think\Exception
      * @throws \think\db\exception\DataNotFoundException
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function drawRecordList($uid,$status){
-         $where ['dr.uid'] = $uid;
-        if($status !== '') $where['dr.status'] = $status;
+    public function drawRecordList($uid, int $page, int $pagesize){
+        $where ['dr.uid'] = $uid;
+        $count = $this->drawRecordData->alias('dr')
+            ->where($where)
+            ->count();
+        if ($count <= 0) return Response::success('暂无数据', ['count' => $count, 'data' => [], 'page' => $page, 'pagesize' => $pagesize]);
         $field = ['dr.*','c.name currency_name'];
         $data = $this->drawRecordData->alias('dr')
             ->join('currency c','c.id = dr.currency_id')
             ->where($where)
             ->field($field)
             ->order(['dr.id desc'])
+            ->page($page, $pagesize)
             ->select();
         if($data) return Response::success('success',collection($data)->toArray());
         return Response::success('暂无数据',[]);

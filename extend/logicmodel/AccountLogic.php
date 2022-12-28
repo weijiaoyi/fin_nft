@@ -103,6 +103,26 @@ class AccountLogic
         return false;
     }
 
+    public function  subFtc($uid,$currency_id,$account,$bill_type,$remark){
+        $where = ['uid'=>$uid,'currency_id'=>$currency_id];
+        $accountInfo = $this->userAccountData->where($where)->lock(true)->find();
+        if(empty($accountInfo)) return false;
+        if($accountInfo['ftc'] < $account) return false;
+        $before_account = $accountInfo['ftc']; //变动前总账户
+        $after_account = bcsub($before_account,$account,10);
+        Db::startTrans();
+        $result = $this->userAccountData->updateByWhere(['id'=>$accountInfo['id']],['ftc'=>$after_account]);
+        if ($result > 0) {
+            $result = $this->bill($uid,$currency_id,$account,$before_account,$after_account,$bill_type,$remark,2);
+            if($result > 0){
+                Db::commit();
+                return true;
+            }
+        }
+        Db::rollback();;
+        return false;
+    }
+
 
     /**
      * 生成系统流水

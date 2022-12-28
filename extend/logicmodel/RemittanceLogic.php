@@ -9,9 +9,11 @@
 namespace logicmodel;
 
 
+use app\admin\model\User;
 use comservice\Response;
 use datamodel\ConfigPay;
 use datamodel\RemittanceRecord;
+use datamodel\Users;
 use think\Db;
 
 class RemittanceLogic
@@ -33,16 +35,24 @@ class RemittanceLogic
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function remittanceRecordList($uid){
+    public function remittanceRecordList($uid, $page, $pagesize){
         $where['rr.uid'] = $uid;
         $where['rr.status'] = 1;
-       $field = ['rr.account','rr.status','rr.create_time','cp.name config_pay_name'];
-       $data =  $this->remittanceRecordData->alias('rr')
+
+        $count = $this->remittanceRecordData->alias('rr')
+            ->join('currency c','c.id = rr.currency_id')
+            ->join('config_pay cp','cp.id = rr.config_pay_id')
+            ->where($where)
+            ->count();
+        if ($count <= 0) return Response::success('暂无数据', ['count' => $count, 'data' => [], 'page' => $page, 'pagesize' => $pagesize]);
+        $field = ['rr.account','rr.status','rr.create_time','cp.name config_pay_name'];
+        $data =  $this->remittanceRecordData->alias('rr')
             ->join('currency c','c.id = rr.currency_id')
             ->join('config_pay cp','cp.id = rr.config_pay_id')
             ->where($where)
             ->order(['rr.id desc'])
             ->field($field)
+            ->page($page, $pagesize)
             ->select();
       if($data) return Response::success('success',collection($data)->toArray());
       return   Response::success('暂无数据',[]);
@@ -63,6 +73,27 @@ class RemittanceLogic
             return Response::success('success',$data);
        }
        return Response::success('success');
+    }
+
+    /**
+     * 充值地址
+     * @param $userInfo
+     * @return array
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
+    public function address($userInfo){
+        $account['bsc_wallet_address'] = $userInfo['bsc_wallet_address'];
+        $account['trc_wallet_address'] = $userInfo['trc_wallet_address'];
+        $account['erc_wallet_address'] = $userInfo['erc_wallet_address'];
+      if(empty($userInfo['bsc_wallet_address'])){
+          $userLogic = new UserLogic();
+          $account = $userLogic->getAccountAddress($userInfo['id']);
+          $users =  new Users();
+          $users->updateByWhere(['id' => $userInfo['id']],$account);
+          unset($account['erc_private_key'],$account['bsc_private_key'],$account['trc_private_key']);
+      }
+       return Response::success('success',$account);
     }
 
     /**

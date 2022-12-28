@@ -689,7 +689,7 @@ class UserLogic
             $redis = GetRedis::getRedis();
             $redis->setItem($jwt, $userInfo['id']);
             $nick_name= 'sp_' . rand(111111, 999999);
-            $account = $this->getAccountAddress();
+            $account = $this->getAccountAddress($userInfo['id']);
             if ($account === false) return Response::fail('地址生成失败');
             $account['uuid'] =  uuid();
             $account['nick_name'] = $nick_name;
@@ -705,7 +705,7 @@ class UserLogic
 
     }
 
-    private function getAccountAddress(){
+    public function getAccountAddress($uid=0){
         // Bip39
         $math = Bitcoin::getMath();
         $network = Bitcoin::getNetwork();
@@ -718,7 +718,7 @@ class UserLogic
 
         $seedGenerator = new Bip39SeedGenerator();
         // 通过助记词生成种子，传入可选加密串'hello'
-        $seed = $seedGenerator->getSeed($mnemonic, 'fin_nft');
+        $seed = $seedGenerator->getSeed($mnemonic, 'fin_nft_'.$uid);
        // echo "seed: " . $seed->getHex() . PHP_EOL;
         $hdFactory = new HierarchicalKeyFactory();
         $master = $hdFactory->fromEntropy($seed);

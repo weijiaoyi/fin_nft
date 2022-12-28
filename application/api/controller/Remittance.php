@@ -28,6 +28,16 @@ class Remittance extends BaseController
     }
 
     /**
+     * 充值地址
+     * @return \think\response\Json
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
+    public function address(){
+        return json($this->remittanceLogic->address($this->userInfo));
+    }
+
+    /**
      * 充值
      * @param $config_pay_id
      * @param $account
@@ -48,8 +58,8 @@ class Remittance extends BaseController
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function remittanceRecordList(){
-        return json($this->remittanceLogic->remittanceRecordList($this->uid));
+    public function remittanceRecordList($page=1,$pagesize=10){
+        return json($this->remittanceLogic->remittanceRecordList($this->uid,$page,$pagesize));
     }
 
 }

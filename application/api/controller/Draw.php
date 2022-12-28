@@ -41,20 +41,19 @@ class Draw extends BaseController
      * @throws \think\exception\DbException
      * @throws \think\exception\PDOException
      */
-    public function  draw($account,$type=1){
-        return json($this->drawLogic->draw($this->userInfo,$account,$type));
+    public function  draw($account=0,$type='',$currency='usdt',$address=''){
+        return json($this->drawLogic->draw($this->userInfo,$account,$type,$currency,$address));
     }
 
     /**
      * 提现记录
-     * @param $status
      * @return \think\response\Json
      * @throws \think\Exception
      * @throws \think\db\exception\DataNotFoundException
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function drawRecordList($status){
-        return json($this->drawLogic->drawRecordList($this->uid,$status));
+    public function drawRecordList($page=1,$pagesize=10){
+        return json($this->drawLogic->drawRecordList($this->uid,$page,$pagesize));
     }
 }
