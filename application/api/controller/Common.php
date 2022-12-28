@@ -18,7 +18,12 @@ class Common extends Controller
      */
     public function contact()
     {
-        return json(Contact::where('is_show','=',1)->where('is_del','=',0)->select());
+        $list = Contact::where('is_show','=',1)->where('is_del','=',0)->select();
+        if($list){
+            $list = collection($list)->toArray();
+            $list = addWebSiteUrl($list, ['image']);
+        }
+        return json($list);
     }
 
     /**
