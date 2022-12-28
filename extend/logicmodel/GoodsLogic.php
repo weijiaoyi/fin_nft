@@ -154,10 +154,21 @@ class GoodsLogic
      * @throws \think\exception\DbException
      * @throws \think\exception\PDOException
      */
-    public function apply($uid, $id)
+    public function apply($userInfo, $id,$pay_password)
     {
+        $uid = $userInfo['id'];
         //$count = $this->ordersData->where(['buy_uid' => $uid, 'status' => 1])->count();
         //if ($count >= 20) return Response::fail('您的待付款订单已达上限');
+        if($id==0 || empty($pay_password)){
+            return Response::fail('参数错误');
+        }
+        $password = md5(md5($pay_password) . $userInfo['pay_salt']);
+        if(empty($userInfo['pay_password'])){
+            return Response::fail('请先设置支付密码');
+        }
+        if($password!=$userInfo['pay_password']){
+            return Response::fail('支付密码错误');
+        }
         $goodsInfo = $this->goodsData->where(['is_del' => 0, 'is_show' => 1, 'id' => $id])->find();
         if (empty($goodsInfo)) return Response::fail('商品信息错误');
         //单品购买  盲盒不用管是否售罄
