@@ -9,7 +9,7 @@ use app\admin\model\Contact;
 use app\admin\model\GoodsRank;
 use think\Controller;
 
-class Common extends Controller
+class Common extends BaseController
 {
 
     /**
