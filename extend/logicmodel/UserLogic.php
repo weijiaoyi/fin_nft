@@ -301,6 +301,7 @@ class UserLogic
     public function userInfo($userInfo)
     {
         $sell_num = GoodsUsers::where('uid',$userInfo['id'])->where('status',2)->count();
+        $nft_num = GoodsUsers::where('uid',$userInfo['id'])->whereIn('status',[1,2])->count();
         $bsc_wallet_address = $userInfo['bsc_wallet_address'];
         $trc_wallet_address = $userInfo['trc_wallet_address'];
         $erc_wallet_address = $userInfo['erc_wallet_address'];
@@ -325,6 +326,7 @@ class UserLogic
        // $data['ht_wallet_address'] = $userInfo['ht_wallet_address'];
        // $data['ht_private_key'] = $userInfo['ht_private_key'];
         $data['sell_num'] = $sell_num;
+        $data['nft_num'] = $nft_num;
         $data['name'] = $userInfo['name'];
         $data['card'] = $userInfo['card'];
         $data['card_front_image'] = $userInfo['card_front_image'];
