@@ -7,9 +7,10 @@ namespace app\api\controller;
 
 use app\admin\model\Contact;
 use app\admin\model\GoodsRank;
+use comservice\Response;
 use think\Controller;
 
-class Common extends BaseController
+class Common extends Controller
 {
 
     /**
@@ -23,7 +24,7 @@ class Common extends BaseController
             $list = collection($list)->toArray();
             $list = addWebSiteUrl($list, ['image']);
         }
-        return json($list);
+        return json(Response::success('success',$list));
     }
 
     /**
@@ -37,7 +38,7 @@ class Common extends BaseController
             $rank = collection($rank)->toArray();
             $rank = addWebSiteUrl($rank, ['image']);
         }
-        return json($rank);
+        return json(Response::success('success',$rank));
     }
 
     /**
@@ -47,7 +48,7 @@ class Common extends BaseController
     public function bidding()
     {
         $bidding_rules = config('site.bidding_rules');
-        return json($bidding_rules);
+        return json(Response::success('success',['rules'=>$bidding_rules]));
     }
 
 }
