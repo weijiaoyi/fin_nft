@@ -73,6 +73,15 @@ class Buy extends BaseController
     }
 
     /**
+     * 删除
+     * @param $id
+     * @return \think\response\Json
+     */
+    public function del($id){
+        return json(BuyModel::del($id,$this->uid));
+    }
+
+    /**
      * 竞价
      * @param $id
      * @return \think\response\Json

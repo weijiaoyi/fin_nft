@@ -120,6 +120,11 @@ class User extends BaseController
         return json($this->userLogic->team($level,$page,$pagesize,$this->userInfo));
     }
 
+    public function teamStatistics($level=1)
+    {
+        return json($this->userLogic->teamStatistics($level,$this->uid));
+    }
+
     /**
      * 收款信息
      * @return \think\response\Json

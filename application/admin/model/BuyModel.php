@@ -71,7 +71,7 @@ class BuyModel extends Model
      */
     public static function buyList($status=1,int $page, int $pagesize)
     {
-        $where['g.user_id'] = $status;
+        $where['g.status'] = $status;
         $count = self::alias('g')->where($where)->count();
         if ($count <= 0){
             return Response::success('暂无数据', ['count' => $count, 'data' => [], 'page' => $page, 'pagesize' => $pagesize]);
@@ -96,7 +96,7 @@ class BuyModel extends Model
 
     public static function myBuyList($uid,int $page, int $pagesize)
     {
-        $where['g.status'] = $uid;
+        $where['g.user_id'] = $uid;
         $count = self::alias('g')->where($where)->count();
         if ($count <= 0){
             return Response::success('暂无数据', ['count' => $count, 'data' => [], 'page' => $page, 'pagesize' => $pagesize]);
@@ -150,6 +150,16 @@ class BuyModel extends Model
             return Response::success('success', $data);
         }
         return Response::success('暂无数据');
+    }
+
+    public static function del($id, $uid)
+    {
+        $data = self::where('id',$id)->where('user_id',$uid)->delete();
+        if($data){
+            return Response::success('删除成功');
+        }else{
+            return Response::fail('无权限');
+        }
     }
 
     public function user()
