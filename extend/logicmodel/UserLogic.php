@@ -696,6 +696,7 @@ class UserLogic
             $account['uuid'] = 'sp_' . rand(111111, 999999);
             $account['app_token'] = $jwt;
             $account['nonce'] = $nonce;
+            $account['ftc'] = 0;
             $account['login_time'] = date('Y-m-d H:i:s');
             $this->usersData->updateByWhere(['id' => $userInfo['id']],$account);
             return Response::success('授权成功', ['app_token' => $jwt]);

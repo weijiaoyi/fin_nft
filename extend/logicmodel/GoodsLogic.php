@@ -428,6 +428,13 @@ class GoodsLogic
      */
     public function orderList($uid, $status, $page, $pagesize)
     {
+        $status_text_arr = [
+            2=>'已购买',
+            3=>'竞价中',
+            4=>'未拍中',
+            5=>'提现成功',
+            6=>'提现失败',
+        ];
         $where['o.buy_uid'] = $uid;
         if ($status > 0) $where['o.status'] = $status;
         $count = $this->ordersData->alias('o')
@@ -443,7 +450,7 @@ class GoodsLogic
             ->where($where)
             ->order(['o.id desc'])
             ->page($page, $pagesize)
-            ->field(['o.*', 'g.name goods_name', 'g.image goods_image', 'bg.image buy_goods_image', 'bg.name buy_goods_name', 'gc.name goods_category_name'])
+            ->field(['o.*', 'g.name goods_name', 'g.sell_type', 'g.image goods_image', 'bg.image buy_goods_image', 'bg.name buy_goods_name', 'gc.name goods_category_name'])
             ->select();
         if ($data) {
             $data = collection($data)->toArray();
@@ -452,6 +459,7 @@ class GoodsLogic
                     $v['goods_image'] = $v['buy_goods_image'];
                     $v['goods_name'] = $v['buy_goods_name'];
                 }
+                $v['status_text'] = isset($status_text_arr[$v['status']]) ? $status_text_arr[$v['status']] : '';
             }
             $data = addWebSiteUrl($data, ['goods_image']);
             return Response::success('success', ['count' => $count, 'data' => $data, 'page' => $page, 'pagesize' => $pagesize]);
