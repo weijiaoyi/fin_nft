@@ -20,7 +20,10 @@ class Buy extends BaseController
      */
     public function  publish(Request $request){
         $describe = $request->post('describe','');
-        $contact = $request->post('contact/a','');
+        $contact = $request->post('contact','');
+        if(!empty($contact)){
+            $contact = json_decode($contact,true);
+        }
         $level = $request->post('level',0);
         $part = $request->post('part',0);
         if(empty($describe) || $level==0 ){

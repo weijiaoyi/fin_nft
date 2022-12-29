@@ -40,5 +40,14 @@ class Common extends Controller
         return json($rank);
     }
 
+    /**
+     * 竞价规则
+     * @return \think\response\Json
+     */
+    public function bidding()
+    {
+        $bidding_rules = config('site.bidding_rules');
+        return json($bidding_rules);
+    }
 
 }
