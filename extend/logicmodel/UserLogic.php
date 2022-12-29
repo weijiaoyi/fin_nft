@@ -301,6 +301,15 @@ class UserLogic
     public function userInfo($userInfo)
     {
         $sell_num = GoodsUsers::where('uid',$userInfo['id'])->where('status',2)->count();
+        $bsc_wallet_address = $userInfo['bsc_wallet_address'];
+        $trc_wallet_address = $userInfo['trc_wallet_address'];
+        $erc_wallet_address = $userInfo['erc_wallet_address'];
+        if(empty($userInfo['bsc_wallet_address'])) {
+            $account = $this->getAccountAddress($userInfo['id']);
+            $bsc_wallet_address = $account['bsc_wallet_address'];
+            $trc_wallet_address = $account['trc_wallet_address'];
+            $erc_wallet_address = $account['erc_wallet_address'];
+        }
         $data['head_image'] = $userInfo['head_image'];
         $data['nick_name'] = $userInfo['nick_name'];
         $data['role_id'] = $userInfo['role_id'];
@@ -309,9 +318,9 @@ class UserLogic
         $data['total_direct'] = $userInfo['total_direct'];
         $data['wallet_address'] = $userInfo['wallet_address'];
         //$data['wallet_private_key'] = $userInfo['wallet_private_key'];
-        $data['bsc_wallet_address'] = $userInfo['bsc_wallet_address'];
-        $data['trc_wallet_address'] = $userInfo['trc_wallet_address'];
-        $data['erc_wallet_address'] = $userInfo['erc_wallet_address'];
+        $data['bsc_wallet_address'] = $bsc_wallet_address;
+        $data['trc_wallet_address'] = $trc_wallet_address;
+        $data['erc_wallet_address'] = $erc_wallet_address;
         //$data['bsc_private_key'] = $userInfo['bsc_private_key'];
        // $data['ht_wallet_address'] = $userInfo['ht_wallet_address'];
        // $data['ht_private_key'] = $userInfo['ht_private_key'];
