@@ -693,7 +693,7 @@ class UserLogic
             if ($account === false) return Response::fail('地址生成失败');
             $account['uuid'] =  uuid();
             $account['nick_name'] = $nick_name;
-            $account['uuid'] = 'sp_' . rand(111111, 999999);
+            $account['uuid'] = uuid();
             $account['app_token'] = $jwt;
             $account['nonce'] = $nonce;
             $account['ftc'] = 0;
