@@ -57,7 +57,7 @@ class Order extends BaseController
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function biddingList($id,$page=1,$pagesize=10)
+    public function biddingList($id=0,$page=1,$pagesize=10)
     {
         return json($this->goodsLogic->biddingList($id,$page,$pagesize));
     }

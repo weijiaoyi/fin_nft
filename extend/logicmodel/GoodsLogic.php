@@ -1079,12 +1079,16 @@ class GoodsLogic
      */
     public function biddingList($id, int $page, int $pagesize)
     {
+        if($id==0 ){
+            return json(Response::invalidParam());
+        }
         $where['o.buy_goods_id'] = $id;
         $count = $this->ordersData
             ->alias('o')
             //->join('users u', 'o.buy_uid = u.id')
             ->where($where)
             ->count();
+        if ($count <= 0) return Response::success('暂无数据', ['count' => $count, 'data' => [], 'page' => $page, 'pagesize' => $pagesize]);
         $data = $this->ordersData->alias('o')
             ->join('users u', 'o.buy_uid = u.id')
             ->where($where)

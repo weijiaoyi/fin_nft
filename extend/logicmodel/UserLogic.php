@@ -321,6 +321,9 @@ class UserLogic
         $uid = $userInfo['id'];
         $team_already_auth = $this->usersData->where(['pid' => $uid, 'is_del' => 0, 'is_auth' => 1])->count();
         $data['team_already_auth'] = $team_already_auth ?: 0;
+        $data['team_already_auth'] = $team_already_auth ?: 0;
+        $data['usdt'] = $userInfo['account'] ? $userInfo['account'] : 0;
+        $data['ftc'] = $userInfo['ftc'] ? $userInfo['ftc'] : 0;
         return Response::success('success', $data);
     }
 
@@ -710,6 +713,7 @@ class UserLogic
         // Bip39
         $math = Bitcoin::getMath();
         $network = Bitcoin::getNetwork();
+
         $random = new Random();
         // 生成随机数(initial entropy)
         $entropy = $random->bytes(Bip39Mnemonic::MIN_ENTROPY_BYTE_LEN);
