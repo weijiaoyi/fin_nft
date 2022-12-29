@@ -71,7 +71,32 @@ class BuyModel extends Model
      */
     public static function buyList($status=1,int $page, int $pagesize)
     {
-        $where['g.status'] = $status;
+        $where['g.user_id'] = $status;
+        $count = self::alias('g')->where($where)->count();
+        if ($count <= 0){
+            return Response::success('暂无数据', ['count' => $count, 'data' => [], 'page' => $page, 'pagesize' => $pagesize]);
+        }
+        $field = ['g.*','gr.image as rank_image', 'u.nick_name','u.head_image','u.rank_id as user_level'];
+        $data = self::alias('g')
+            ->join('goods_rank gr', 'g.level = gr.id','LEFT')
+            ->join('users u', 'g.user_id = u.id','LEFT')
+            ->where($where)
+            ->field($field)
+            ->order(['g.create_time desc'])
+            ->page($page, $pagesize)
+            ->select();
+        if ($data) {
+            $data = collection($data)->toArray();
+            $data = addWebSiteUrl($data, [ 'head_image','rank_image']);
+            return Response::success('success', ['count' => $count, 'data' => $data, 'page' => $page, 'pagesize' => $pagesize]);
+        }
+        return Response::success('暂无数据', ['count' => $count, 'data' => [], 'page' => $page, 'pagesize' => $pagesize]);
+    }
+
+
+    public static function myBuyList($uid,int $page, int $pagesize)
+    {
+        $where['g.status'] = $uid;
         $count = self::alias('g')->where($where)->count();
         if ($count <= 0){
             return Response::success('暂无数据', ['count' => $count, 'data' => [], 'page' => $page, 'pagesize' => $pagesize]);

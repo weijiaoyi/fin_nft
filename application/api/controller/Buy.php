@@ -47,6 +47,20 @@ class Buy extends BaseController
     }
 
     /**
+     * 我的收购列表
+     * @param int $page
+     * @param int $pagesize
+     * @return \think\response\Json
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function myBuyList($page=1,$pagesize=10){
+        return json(BuyModel::myBuyList($this->uid,$page,$pagesize));
+    }
+
+    /**
      * 收购详情
      * @param int $id
      * @return \think\response\Json
