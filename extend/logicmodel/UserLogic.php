@@ -15,6 +15,7 @@ use BitWasp\Bitcoin\Mnemonic\MnemonicFactory;
 use comservice\GetRedis;
 use comservice\Response;
 use datamodel\Feedback;
+use datamodel\GoodsUsers;
 use datamodel\Users;
 use dh2y\qrcode\QRcode;
 use Elliptic\EC;
@@ -299,6 +300,7 @@ class UserLogic
      */
     public function userInfo($userInfo)
     {
+        $sell_num = GoodsUsers::where('uid',$userInfo['id'])->where('status',2)->count();
         $data['head_image'] = $userInfo['head_image'];
         $data['nick_name'] = $userInfo['nick_name'];
         $data['role_id'] = $userInfo['role_id'];
@@ -306,11 +308,14 @@ class UserLogic
         $data['uuid'] = $userInfo['uuid'];
         $data['total_direct'] = $userInfo['total_direct'];
         $data['wallet_address'] = $userInfo['wallet_address'];
-        $data['wallet_private_key'] = $userInfo['wallet_private_key'];
+        //$data['wallet_private_key'] = $userInfo['wallet_private_key'];
         $data['bsc_wallet_address'] = $userInfo['bsc_wallet_address'];
-        $data['bsc_private_key'] = $userInfo['bsc_private_key'];
-        $data['ht_wallet_address'] = $userInfo['ht_wallet_address'];
-        $data['ht_private_key'] = $userInfo['ht_private_key'];
+        $data['trc_wallet_address'] = $userInfo['trc_wallet_address'];
+        $data['erc_wallet_address'] = $userInfo['erc_wallet_address'];
+        //$data['bsc_private_key'] = $userInfo['bsc_private_key'];
+       // $data['ht_wallet_address'] = $userInfo['ht_wallet_address'];
+       // $data['ht_private_key'] = $userInfo['ht_private_key'];
+        $data['sell_num'] = $sell_num;
         $data['name'] = $userInfo['name'];
         $data['card'] = $userInfo['card'];
         $data['card_front_image'] = $userInfo['card_front_image'];
