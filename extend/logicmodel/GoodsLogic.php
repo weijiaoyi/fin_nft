@@ -436,7 +436,20 @@ class GoodsLogic
             6=>'提现失败',
         ];
         $where['o.buy_uid'] = $uid;
-        if ($status > 0) $where['o.status'] = $status;
+        switch ($status){
+            case 1:
+                $where['o.status'] = 2;
+                break;
+            case 2:
+                $where['o.status'] = 3;
+                break;
+            case 3:
+                $where['o.status'] = 4;
+                break;
+            case 4:
+                $where['o.status'] = ['in',[5,6]];
+                break;
+        }
         $count = $this->ordersData->alias('o')
             ->join('goods g', 'g.id = o.goods_id')
             ->join('goods_category gc', 'gc.id = g.goods_category_id')
