@@ -99,7 +99,7 @@ class Buy extends BaseController
      * @return \think\response\Json
      */
     public function biddingList($id,$page=1,$pagesize=10){
-        return json(GoodsBidding::biddingList($id,$page=1,$pagesize=10));
+        return json(GoodsBidding::biddingList($id,$page,$pagesize));
     }
 
     /**

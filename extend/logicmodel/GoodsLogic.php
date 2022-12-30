@@ -64,10 +64,15 @@ class GoodsLogic
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function goodsList($search,$is_chip,$page, $pagesize)
+    public function goodsList($search,$is_chip,$is_official,$page, $pagesize)
     {
         if($is_chip!=-1){
             $where['g.is_chip'] = $is_chip;
+        }
+        if($is_official==1){
+            $where['g.goods_user_id'] = 0;
+        }else{
+            $where['g.goods_user_id'] = ['neq',0];
         }
         $where['g.is_del'] = 0;
         $where['g.is_show'] = 1;
