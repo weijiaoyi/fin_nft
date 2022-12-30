@@ -124,7 +124,7 @@ class Backpack extends BaseController
             $add = [];
             $add['image'] = $goods->image;
             $add['sell_type'] = $sell_type;
-            $add['specify_ui'] = $sell_type==3 ? $specify_uid : 0;
+            $add['specify_uid'] = $sell_type==3 ? $specify_uid : 0;
             $add['duration'] = $time;
             $add['price'] = $price;
             $add['stock'] = 1;
