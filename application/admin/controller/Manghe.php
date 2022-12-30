@@ -15,7 +15,7 @@ use think\Model;
  *
  * @icon fa fa-circle-o
  */
-class Goods extends Backend
+class Manghe extends Backend
 {
 
     /**
@@ -65,7 +65,7 @@ class Goods extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $list = $this->model
-                ->where(['goods.is_del' => 0,'goods.is_manghe'=>0])
+                ->where(['goods.is_del' => 0,'goods.is_manghe'=>1])
                 ->with(['coupon', 'goodscategory','goodsrank'])
                 ->where($where)
                 ->order($sort, $order)
@@ -109,7 +109,7 @@ class Goods extends Backend
 
     public function list()
     {
-        return json($this->model->where(['is_del' => 0,'is_manghe'=>0])->select());
+        return json($this->model->where(['is_del' => 0,'is_manghe'=>1])->select());
     }
 
     public function zhuzao($ids = "")
@@ -246,7 +246,7 @@ class Goods extends Backend
             $this->model->where($this->dataLimitField, 'in', $adminIds);
         }
         $list = [];
-        $manghe['is_manghe'] = 0;
+        $manghe['is_manghe'] = 1;
         $total = $this->model->where($where)->where($manghe)->count();
         if ($total > 0) {
             if (is_array($adminIds)) {
@@ -326,6 +326,7 @@ class Goods extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+                    $params['is_manghe'] = 1;
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {

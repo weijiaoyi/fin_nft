@@ -37,7 +37,7 @@ class Backpack extends BaseController
             $where['gu.level'] = $level;
         }
         $where['gu.uid'] = $this->uid;
-        $where['gu.status'] = array('lt',4);
+        $where['gu.status'] = 1;// array('lt',4);
         $count = $goodsUser->alias('gu')
             ->where($where)
             ->count();

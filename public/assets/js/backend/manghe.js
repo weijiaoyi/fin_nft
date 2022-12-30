@@ -8,13 +8,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 commonSearch: true,
                 searchFormVisible: true,
                 extend: {
-                    index_url: 'goods/index' + location.search,
-                    add_url: 'goods/add',
-                    edit_url: 'goods/edit',
-                    del_url: 'goods/del',
-                    multi_url: 'goods/multi',
+                    index_url: 'manghe/index' + location.search,
+                    add_url: 'manghe/add',
+                    edit_url: 'manghe/edit',
+                    del_url: 'manghe/del',
+                    multi_url: 'manghe/multi',
                    config_url: 'goods_config/index',
-                    import_url: 'goods/import',
+                    import_url: 'manghe/import',
                     table: 'goods',
                 }
             });
