@@ -167,7 +167,7 @@ class Buy extends BaseController
         $where=[];
         $where['gu.id'] = $id;
         $where['gu.uid'] = $this->uid;
-        $field = 'gu.id,gu.is_chip,gu.part,gu.level,g.price,g.sell_type,g.specify_uid,gr.image,g.image as chip_image,gu.status,g.duration,g.sell_type,g.specify_uid,g.id as goods_id,g.create_time';
+        $field = 'gu.id,gu.is_chip,gu.part,gu.level,g.price,g.sell_type,g.specify_uid,gr.image,g.image as chip_image,gu.status,g.duration,g.sell_type,g.specify_uid,g.id as goods_id,g.start_time';
         $data = $goodsUser->alias('gu')
             ->join('goods g', 'gu.id = g.goods_user_id','LEFT')
             ->join('goods_rank gr', 'g.level = gr.id','LEFT')
