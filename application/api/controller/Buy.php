@@ -5,6 +5,7 @@ namespace app\api\controller;
 
 use app\admin\model\GoodsBidding;
 use app\admin\model\GoodsUsers;
+use app\admin\model\Orders;
 use comservice\Response;
 use think\Request;
 use app\admin\model\BuyModel;
@@ -166,7 +167,7 @@ class Buy extends BaseController
         $where=[];
         $where['gu.id'] = $id;
         $where['gu.uid'] = $this->uid;
-        $field = 'gu.id,gu.is_chip,gu.part,gu.level,g.price,g.sell_type,g.specify_uid,gr.image,g.image as chip_image,gu.status';
+        $field = 'gu.id,gu.is_chip,gu.part,gu.level,g.price,g.sell_type,g.specify_uid,gr.image,g.image as chip_image,gu.status,g.duration,g.sell_type,g.specify_uid,g.id as goods_id';
         $data = $goodsUser->alias('gu')
             ->join('goods g', 'gu.id = g.goods_user_id','LEFT')
             ->join('goods_rank gr', 'g.level = gr.id','LEFT')
@@ -178,8 +179,12 @@ class Buy extends BaseController
             $data = $data->toArray();
             $data = addWebSiteUrl($data, ['image','chip_image']);
         }
+        $data['bidding_price'] = 0;
         if($data['sell_type']==2){
-            //$data['']
+           // $biddingPrice = Orders::where('goods_id',$data['goods_id'])->order('price','desc')->find();
+           // if($biddingPrice){
+           //     $data['bidding_price'] = $biddingPrice['price'];
+          //  }
         }
         return json( Response::success('success',$data));
     }

@@ -297,6 +297,9 @@ class GoodsLogic
         $bidding_step = config('site.bidding_step');//最低加价数
         Db::startTrans();
         $gBidding = $this->ordersData->where('goods_id',$goods_id)->order('price','desc')->find();
+        if($goodsInfo['price']>$price){
+            return Response::fail('竞价价格低于当前价');
+        }
         if($gBidding){
             if($price<$gBidding->price+$bidding_step){
                 return Response::fail('竞价价格低于当前价');
