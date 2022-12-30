@@ -30,10 +30,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id'), operate: false},
-                        {field: 'name', title: __('Name'), operate: 'LIKE'},
+                        {field: 'name', title: '盲盒名称', operate: 'LIKE'},
                         {field: 'goodsrank.name', title: '等级', operate: false},
                         {field: 'is_can_buy', title: '是否参与买卖', searchList: {"0":'不参与',"1":'参与'}, formatter: Table.api.formatter.normal},
-                        {field: 'image', title: __('Image'), operate: false, events: Table.api.events.image, formatter: Table.api.formatter.image},
+                        {field: 'image', title: '封面图', operate: false, events: Table.api.events.image, formatter: Table.api.formatter.image},
                         {field: 'order', title: __('Order'), operate: false},
                         {field: 'is_show', title: __('Is_show'), searchList: {"0":__('Is_show 0'),"1":__('Is_show 1')}, formatter: Table.api.formatter.normal},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
