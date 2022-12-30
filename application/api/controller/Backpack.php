@@ -103,7 +103,7 @@ class Backpack extends BaseController
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function sell($id=0,$sell_type = 1,$price=0,$specify_ui=0,$time=24){
+    public function sell($id=0,$sell_type = 1,$price=0,$specify_uid=0,$time=24){
         if($id==0 || $price<=0 ){
             Db::rollback();
             return json(Response::invalidParam());
@@ -124,7 +124,7 @@ class Backpack extends BaseController
             $add = [];
             $add['image'] = $goods->image;
             $add['sell_type'] = $sell_type;
-            $add['specify_ui'] = $sell_type==3 ? $specify_ui : 0;
+            $add['specify_ui'] = $sell_type==3 ? $specify_uid : 0;
             $add['duration'] = $time;
             $add['price'] = $price;
             $add['stock'] = 1;
@@ -139,6 +139,7 @@ class Backpack extends BaseController
             $goodsUser['status'] = 2;
             $goodsUser->save();
          Db::commit();
+        return json( Response::success('出售成功'));
     }
 
     /**

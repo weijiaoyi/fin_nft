@@ -69,7 +69,7 @@ class Buy extends BaseController
      * @throws \think\exception\DbException
      */
     public function details($id=0){
-        return json(BuyModel::details($id));
+        return json(BuyModel::details($id,$this->uid));
     }
 
     /**

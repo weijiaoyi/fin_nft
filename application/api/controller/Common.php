@@ -51,4 +51,23 @@ class Common extends Controller
         return json(Response::success('success',['rules'=>$bidding_rules]));
     }
 
+    /**
+     * 用户协议
+     * @return \think\response\Json
+     */
+    public function userAgreement()
+    {
+        $users_content = config('site.users_content');
+        return json(Response::success('success',['user_agreement'=>$users_content]));
+    }
+
+
+    public function biddingTiming()
+    {
+        $users_content = config('site.users_content');
+        return json(Response::success('success',['user_agreement'=>$users_content]));
+    }
+
+
+
 }

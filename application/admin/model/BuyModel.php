@@ -126,8 +126,8 @@ class BuyModel extends Model
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public static function details($id){
-        $where['g.status'] = 1;
+    public static function details($id,$uid){
+       // $where['g.status'] = 1;
         $where['g.id'] = $id;
         $field = ['g.*,gr.image as rank_image,u.nick_name,u.head_image,u.rank_id as user_level'];
         $data = self::alias('g')
@@ -139,6 +139,10 @@ class BuyModel extends Model
             ->find();
         if ($data) {
             $data = $data->toArray();
+            $data['is_my'] = 0;
+            if($data['user_id']==$uid){
+                $data['is_my'] = 1;
+            }
             $buyContactList = BuyContact::alias('bc')
                 ->join('contact c', 'bc.contact_id = c.id','LEFT')
                 ->where('bc.buy_id',$data['id'])
