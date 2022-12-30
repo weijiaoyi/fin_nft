@@ -242,8 +242,6 @@ class BlindBox
         $where['g.is_show'] = 1;
         $where['g.is_manghe'] = 1; //非盲盒
         $where['g.is_can_buy'] = 1; //可以参与购买
-        $where['g.start_time'] = ['lt',$time];
-        $where['g.end_time'] = ['gt',$time];
         $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.image';
         $data = $this->goodsData->alias('g')
             ->where($where)

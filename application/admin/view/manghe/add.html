@@ -12,32 +12,9 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">是否是碎片:</label>
-        <div class="col-xs-12 col-sm-8">
-
-            <select  id="c-is_chip" class="form-control selectpicker" name="row[is_chip]">
-                {foreach name="isChipList" item="vo"}
-                <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
-                {/foreach}
-            </select>
-        </div>
-    </div>
-    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Name')}:</label>
         <div class="col-xs-12 col-sm-8">
             <input id="c-name" class="form-control" name="row[name]" type="text">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">等级:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-level" data-rule="required" data-source="goods_rank/index" class="form-control selectpage" name="row[level]" type="text" value="">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Title')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-title" class="form-control" name="row[title]" type="text" value="">
         </div>
     </div>
     <div class="form-group">
@@ -54,38 +31,6 @@
             <ul class="row list-inline faupload-preview" id="p-image"></ul>
         </div>
     </div>
-    <div class="form-group is_manghe">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Images')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <div class="input-group">
-                <input id="c-images" class="form-control" size="50" name="row[images]" type="text" value="">
-                <div class="input-group-addon no-border no-padding">
-                    <span><button type="button" id="faupload-images" class="btn btn-danger faupload" data-input-id="c-images" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true" data-preview-id="p-images"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
-                    <span><button type="button" id="fachoose-images" class="btn btn-primary fachoose" data-input-id="c-images" data-mimetype="image/*" data-multiple="true"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
-                </div>
-                <span class="msg-box n-right" for="c-images"></span>
-            </div>
-            <ul class="row list-inline faupload-preview" id="p-images"></ul>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Price')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-price" class="form-control" step="0.01" name="row[price]" type="number">
-        </div>
-    </div>
-    <!--<div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Type')}:</label>
-        <div class="col-xs-12 col-sm-8">
-
-            <select  id="c-type" class="form-control selectpicker" name="row[type]">
-                {foreach name="typeList" item="vo"}
-                    <option value="{$key}" {in name="key" value="1"}selected{/in}>{$vo}</option>
-                {/foreach}
-            </select>
-
-        </div>
-    </div>-->
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Content')}:</label>
         <div class="col-xs-12 col-sm-8">
@@ -99,104 +44,6 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Start_time')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-start_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[start_time]" type="text" value="{:date('Y-m-d H:i:s')}">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('End_time')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-end_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[end_time]" type="text" value="{:date('Y-m-d H:i:s')}">
-        </div>
-    </div>
-    <div class="form-group is_manghe">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Stock')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-stock" class="form-control" name="row[stock]" type="number">
-        </div>
-    </div>
-    <div class="form-group is_manghe">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Sales')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-sales" class="form-control" name="row[sales]" type="number">
-        </div>
-    </div>
-    <div class="form-group is_manghe">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Surplus')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-surplus" class="form-control" name="row[surplus]" type="number">
-        </div>
-    </div>
-    <div class="form-group is_manghe">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Company_name')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-company_name" class="form-control" name="row[company_name]" type="text" value="">
-        </div>
-    </div>
-    <div class="form-group is_manghe">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Company_image')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <div class="input-group">
-                <input id="c-company_image" class="form-control" size="50" name="row[company_image]" type="text" value="">
-                <div class="input-group-addon no-border no-padding">
-                    <span><button type="button" id="faupload-company_image" class="btn btn-danger faupload" data-input-id="c-company_image" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="false" data-preview-id="p-company_image"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
-                    <span><button type="button" id="fachoose-company_image" class="btn btn-primary fachoose" data-input-id="c-company_image" data-mimetype="image/*" data-multiple="false"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
-                </div>
-                <span class="msg-box n-right" for="c-company_image"></span>
-            </div>
-            <ul class="row list-inline faupload-preview" id="p-company_image"></ul>
-        </div>
-    </div>
-    <div class="form-group is_manghe">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Creator')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-creator" class="form-control" name="row[creator]" type="text" value="">
-        </div>
-    </div>
-    <div class="form-group is_manghe">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Owner')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-owner" class="form-control" name="row[owner]" type="text" value="">
-        </div>
-    </div>
-    <div class="form-group is_manghe">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Casting_name')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-casting_name" class="form-control" name="row[casting_name]" type="text">
-        </div>
-    </div>
-    <div class="form-group is_manghe">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Casting_time')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-casting_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[casting_time]" type="text" value="{:date('Y-m-d H:i:s')}">
-        </div>
-    </div>
-    <div class="form-group is_manghe">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Token_id')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-token_id"   class="form-control" name="row[token_id]" type="text" value="">
-        </div>
-    </div>
-    <div class="form-group is_manghe">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Blockchain')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-blockchain" class="form-control" name="row[blockchain]" type="text" value="">
-        </div>
-    </div>
-    <div class="form-group is_manghe">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Contract_address')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-contract_address" class="form-control" name="row[contract_address]" type="text" value="">
-        </div>
-    </div>
-    <div class="form-group is_manghe">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Contract_address_url')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-contract_address_url" class="form-control" name="row[contract_address_url]" type="text" value="">
-        </div>
-    </div>
-    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Is_show')}:</label>
         <div class="col-xs-12 col-sm-8">
 
@@ -206,12 +53,6 @@
                 {/foreach}
             </select>
 
-        </div>
-    </div>
-        <div class="form-group is_manghe">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Label')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-label" class="form-control" name="row[label]" type="text" value="">
         </div>
     </div>
     <div class="form-group layer-footer">
