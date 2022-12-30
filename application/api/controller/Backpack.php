@@ -76,9 +76,9 @@ class Backpack extends BaseController
         $where=[];
         $where['gu.id'] = $id;
         $where['gu.uid'] = $this->uid;
-        $field = 'gu.id,gu.is_chip,gu.part,gu.level,gu.price,gr.image,g.image as chip_image,gu.status';
+        $field = 'gu.id,gu.is_chip,gu.part,gu.level,gu.price,gr.image,g.image as chip_image,gu.status,g.duration,g.sell_type,g.specify_uid';
         $data = $goodsUser->alias('gu')
-            ->join('goods g', 'gu.goods_id = g.id','LEFT')
+            ->join('goods g', 'gu.id = g.goods_user_id','LEFT')
             ->join('goods_rank gr', 'g.level = gr.id','LEFT')
             ->where($where)
             ->field($field)
