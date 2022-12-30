@@ -118,10 +118,10 @@ class Backpack extends BaseController
                 Db::rollback();
                 return json( Response::fail('当前状态不可出售'));
             }
-            $map =[];
-            $map['goods_user_id'] = $goodsUser->id;
+
             $goods = Goods::where(['level'=>$goodsUser['level'],'part'=>$goodsUser['part']])->find();
             $add = [];
+            $add['goods_user_id'] = $id;
             $add['image'] = $goods->image;
             $add['sell_type'] = $sell_type;
             $add['specify_uid'] = $sell_type==3 ? $specify_uid : 0;
