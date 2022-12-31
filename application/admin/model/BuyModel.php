@@ -148,8 +148,12 @@ class BuyModel extends Model
                 ->where('bc.buy_id',$data['id'])
                 ->field('bc.address,c.name contact_name,c.image as contact_image')
                 ->select();
-            $buyContactList = collection($buyContactList)->toArray();
-            $data['contact'] = addWebSiteUrl($buyContactList, [ 'contact_image']);
+            if($buyContactList){
+                $buyContactList = collection($buyContactList)->toArray();
+                $data['contact'] = addWebSiteUrl($buyContactList, [ 'contact_image']);
+            }else{
+                $data['contact'] = [];
+            }
             $data = addWebSiteUrl($data, [ 'head_image','rank_image']);
             return Response::success('success', $data);
         }
