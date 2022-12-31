@@ -340,6 +340,7 @@ class UserLogic
         $data['team_already_auth'] = $team_already_auth ?: 0;
         $data['usdt'] = $userInfo['account'] ? $userInfo['account'] : 0;
         $data['ftc'] = $userInfo['ftc'] ? $userInfo['ftc'] : 0;
+        $data['is_pay_password'] = empty($userInfo['pay_password']) ? 0 : 1;
         return Response::success('success', $data);
     }
 
