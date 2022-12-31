@@ -291,16 +291,16 @@ class BlindBox
     }
 
 
-    public function openBlindBox($goods_id,$number,$userInfo,$pay_password)
+    public function openBlindBox($id,$number,$userInfo,$pay_password)
     {
-        if($goods_id==0 || $number==0 || empty($pay_password)){
+        if($id==0 || $number==0 || empty($pay_password)){
             return Response::fail('盲盒不存在');
         }
-        $info = $this->goodsData->find($goods_id);
+        $info = $this->goodsData->find($id);
         if(!$info){
             return Response::fail('盲盒不存在');
         }
-        $n_info = $this->goodsConfigNumber->where(['number'=>$number,'goods_id'=>$goods_id])->find();
+        $n_info = $this->goodsConfigNumber->where(['number'=>$number,'goods_id'=>$id])->find();
         if(!$n_info){
             return Response::fail('盲盒抽取次数有误');
         }
@@ -330,7 +330,7 @@ class BlindBox
         $order['goods_manghe_users_id'] = $uid;
         $order['order_num'] = $order_num;
         $order['goods_num'] = $number;
-        $order['goods_id'] = $goods_id;
+        $order['goods_id'] = $id;
         $order['sale_uid'] = 1;
         $order['buy_uid'] = $uid;
         $order['price'] = $price;
@@ -341,7 +341,7 @@ class BlindBox
         $order['goods_config_id'] = 0;
         $order['status'] = 2;
         $order['pay_type'] = 1;
-        $order['buy_goods_id'] = $goods_id;
+        $order['buy_goods_id'] = $id;
         $order['order_type'] = 3;
         $result = $this->ordersData->insertGetId($order);
         if ($result) {
@@ -353,7 +353,7 @@ class BlindBox
                 $goodsMangheList = $goodsMangheConfigModel->alias('c')
                     ->join('goods g', 'g.id = c.combination_goods_id')
                     ->field(['c.*', 'g.name goods_name', 'g.image goods_image', 'g.price','g.level','g.part','g.is_chip'])
-                    ->where(['goods_id' => $goods_id])
+                    ->where(['goods_id' => $id])
                     ->select();
                 if ($goodsMangheList) {
                     $goodsMangheList = collection($goodsMangheList)->toArray();
