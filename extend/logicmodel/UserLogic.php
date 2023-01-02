@@ -368,7 +368,6 @@ class UserLogic
     public function setUserFtcNum($uid, $number)
     {
         $data['ftc'] = $number;
-        $data = trimWebUrl($data, ['head_image']);
         $result = $this->usersData->updateByWhere(['id' => $uid], $data);
         UsersAccount::where('uid',$uid)->where('currency_id',1)->save(['ftc'=>$number]);
         if ($result) return Response::success('修改成功');
