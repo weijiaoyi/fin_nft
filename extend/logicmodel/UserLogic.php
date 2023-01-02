@@ -17,6 +17,7 @@ use comservice\Response;
 use datamodel\Feedback;
 use datamodel\GoodsUsers;
 use datamodel\Users;
+use datamodel\UsersAccount;
 use dh2y\qrcode\QRcode;
 use Elliptic\EC;
 use kornrunner\Keccak;
@@ -359,6 +360,17 @@ class UserLogic
         $data['nick_name'] = $nick_name;
         $data = trimWebUrl($data, ['head_image']);
         $result = $this->usersData->updateByWhere(['id' => $uid], $data);
+        if ($result) return Response::success('修改成功');
+        return Response::fail('编辑失败');
+    }
+
+
+    public function setUserFtcNum($uid, $number)
+    {
+        $data['ftc'] = $number;
+        $data = trimWebUrl($data, ['head_image']);
+        $result = $this->usersData->updateByWhere(['id' => $uid], $data);
+        UsersAccount::where('uid',$uid)->where('currency_id',1)->save(['ftc'=>$number]);
         if ($result) return Response::success('修改成功');
         return Response::fail('编辑失败');
     }

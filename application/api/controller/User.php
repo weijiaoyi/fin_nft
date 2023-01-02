@@ -41,6 +41,11 @@ class User extends BaseController
         return json($this->userLogic->editUserInfo($this->uid, $nick_name, $head_image));
     }
 
+    public function setUserFtcNum($number)
+    {
+        return json($this->userLogic->setUserFtcNum($this->uid,$number));
+    }
+
     /**
      * 切换手机号
      * @param $phone
