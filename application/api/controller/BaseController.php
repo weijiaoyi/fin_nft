@@ -43,7 +43,7 @@ class BaseController extends Controller
             ->field($field)
             ->find();
         if (empty($userInfo)) throw  new LoginException('用户身份信息错误');
-        if (empty($userInfo['phone'])) throw  new PhoneException('请先绑定手机号');
+        //if (empty($userInfo['phone'])) throw  new PhoneException('请先绑定手机号');
         if ($userInfo['status'] == 0) throw  new LoginException('账户已冻结');
         if ($userInfo['app_token'] != $token) throw  new LoginException('当前账号已在其他设备登录,您已强制下线!');
         $this->uid = $uid;
