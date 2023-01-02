@@ -176,7 +176,7 @@ class UserLogic
         if (empty($userInfo)) return Response::fail('手机号未注册');
         if ($userInfo['status'] == 0) return Response::fail('账号已冻结');
         if (md5(md5($password) . $userInfo['salt']) != $userInfo['password']) return Response::fail('密码错误');
-        $jwt = Jwt::encode(['id'=>$userInfo['id'],'member'=>$userInfo['member']], Env::get('jws.secret', '123456'));
+        $jwt = Jwt::encode(['id'=>$userInfo['id'],'member'=>$userInfo['nick_name']], Env::get('jws.secret', '123456'));
         $redis = GetRedis::getRedis();
         $redis->setItem($jwt, $userInfo['id']);
         $result = $this->usersData->updateByWhere(['id' => $userInfo['id']], ['app_token' => $jwt, 'login_time' => date('Y-m-d H:i:s')]);
@@ -716,6 +716,7 @@ class UserLogic
             $nonce = uniqid();
             $token = array();
             $token['address'] = $address;
+            $token['id'] = $userInfo['id'];
             $jwt = Jwt::encode($token, Env::get('jws.secret', '123456'));
             $redis = GetRedis::getRedis();
             $redis->setItem($jwt, $userInfo['id']);
