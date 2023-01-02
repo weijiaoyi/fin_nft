@@ -369,7 +369,7 @@ class UserLogic
     {
         $data['ftc'] = $number;
         $result = $this->usersData->updateByWhere(['id' => $uid], $data);
-        UsersAccount::where('uid',$uid)->where('currency_id',1)->save(['ftc'=>$number]);
+        UsersAccount::where('uid',$uid)->where('currency_id',1)->update(['ftc'=>$number]);
         if ($result) return Response::success('修改成功');
         return Response::fail('编辑失败');
     }
