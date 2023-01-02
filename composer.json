@@ -40,7 +40,8 @@
         "yansongda/pay": "v2.x-dev",
         "tencentcloud/tencentcloud-sdk-php": "dev-master",
         "bitwasp/bitcoin": "1.0.x-dev",
-        "web3p/ethereum-util": "dev-master"
+        "web3p/ethereum-util": "dev-master",
+        "web3p/web3.php": "dev-master"
     },
     "config": {
         "preferred-install": "dist",

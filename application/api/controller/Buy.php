@@ -137,7 +137,7 @@ class Buy extends BaseController
         $field = 'gu.id,gu.is_chip,gu.level,gu.part,g.price,gr.image,g.image as chip_image,gu.status';
         $data = $goodsUser->alias('gu')
             ->join('goods g', 'gu.id = g.goods_user_id','LEFT')
-            ->join('goods_rank gr', 'g.level = gr.id','LEFT')
+            ->join('goods_rank gr', 'gu.level = gr.id','LEFT')
             ->where($where)
             ->field($field)
             ->order(['gu.id desc'])
@@ -170,7 +170,7 @@ class Buy extends BaseController
         $field = 'gu.id,gu.is_chip,gu.part,gu.level,g.price,g.sell_type,g.specify_uid,gr.image,g.image as chip_image,gu.status,g.duration,g.sell_type,g.specify_uid,g.id as goods_id,g.start_time';
         $data = $goodsUser->alias('gu')
             ->join('goods g', 'gu.id = g.goods_user_id','LEFT')
-            ->join('goods_rank gr', 'g.level = gr.id','LEFT')
+            ->join('goods_rank gr', 'gu.level = gr.id','LEFT')
             ->where($where)
             ->field($field)
             ->order(['gu.id desc'])
