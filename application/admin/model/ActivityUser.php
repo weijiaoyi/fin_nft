@@ -122,19 +122,18 @@ class ActivityUser extends Model
             $usersGoods['goods_id'] = $winInfo['combination_goods_id'];
             $usersGoods['goods_number'] = $goods_number;
             $usersGoods['price'] = $winInfo['price'];
-            $usersGoods['create_time'] = $winning_time;
+            $usersGoods['create_time'] = $t;
             $usersGoods['status'] = 1; //待出售
             $usersGoods['number'] = $goods_user_number;
             $goodsUsersData->insert($usersGoods);
         }
         $activity->winne_actual = $winne_actual;
         $activity->save();
-        $create_time = date('Y-m-d H:i:s');
         self::insert([
             'user_id'=>$uid,
             'activity_id'=>$id,
             'goods_id'=>$goods_id,
-            'create_time'=>$create_time,
+            'create_time'=>$t,
             'winning_time'=>$winning_time,
             'winning_status'=>$winning_status,
         ]);
