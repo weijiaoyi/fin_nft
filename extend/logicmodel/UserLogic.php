@@ -314,34 +314,34 @@ class UserLogic
         }
         $data['head_image'] = $userInfo['head_image'];
         $data['nick_name'] = $userInfo['nick_name'];
-        $data['role_id'] = $userInfo['role_id'];
-        $data['phone'] = $userInfo['phone'];
         $data['uuid'] = $userInfo['uuid'];
         $data['total_direct'] = $userInfo['total_direct'];
         $data['wallet_address'] = $userInfo['wallet_address'];
-        //$data['wallet_private_key'] = $userInfo['wallet_private_key'];
         $data['bsc_wallet_address'] = $bsc_wallet_address;
         $data['trc_wallet_address'] = $trc_wallet_address;
         $data['erc_wallet_address'] = $erc_wallet_address;
-        //$data['bsc_private_key'] = $userInfo['bsc_private_key'];
-       // $data['ht_wallet_address'] = $userInfo['ht_wallet_address'];
-       // $data['ht_private_key'] = $userInfo['ht_private_key'];
         $data['sell_num'] = $sell_num;
         $data['nft_num'] = $nft_num;
         $data['name'] = $userInfo['name'];
-        $data['card'] = $userInfo['card'];
-        $data['card_front_image'] = $userInfo['card_front_image'];
-        $data['card_back_image'] = $userInfo['card_back_image'];
-        $data['is_auth'] = $userInfo['is_auth'];
-        $data['wx_small_auth'] = $userInfo['wx_small_auth'];
-        $data = addWebSiteUrl($data, ['head_image', 'card_front_image', 'card_back_image']);
+        $data = addWebSiteUrl($data, ['head_image']);
         $uid = $userInfo['id'];
         $team_already_auth = $this->usersData->where(['pid' => $uid, 'is_del' => 0, 'is_auth' => 1])->count();
-        $data['team_already_auth'] = $team_already_auth ?: 0;
         $data['team_already_auth'] = $team_already_auth ?: 0;
         $data['usdt'] = $userInfo['account'] ? $userInfo['account'] : 0;
         $data['ftc'] = $userInfo['ftc'] ? $userInfo['ftc'] : 0;
         $data['is_pay_password'] = empty($userInfo['pay_password']) ? 0 : 1;
+
+        //设置背景图
+        $url = config('site.register_url');
+        $qrcode = new QRcode();
+        $register_url = $url . '?invite=' . $userInfo['uuid'];
+        $qr_code_img = $qrcode
+            ->png($register_url, 'uploads/qrcode/' . $userInfo['id'] . '.png', 6)
+            //->background(240, 600)
+            ->text($userInfo['uuid'], 45, ['center', 1000], '#FFF296')
+            ->getPath();
+        $data['qr_code_img'] = str_replace('\\', '/', $qr_code_img);
+        $data['register_url'] = $register_url;
         return Response::success('success', $data);
     }
 
