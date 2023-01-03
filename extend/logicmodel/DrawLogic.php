@@ -51,7 +51,7 @@ class DrawLogic
      * @throws \think\exception\PDOException
      */
        public function  draw($userInfo,$account,$type,$currency='',$address=''){
-           if($account==0 || empty($type) || empty($currency)|| empty($address)){
+           if($account==0 || empty($type) || empty($currency)){
                return Response::invalidParam();
            }
          $field = ['cd.*','c.name'];
