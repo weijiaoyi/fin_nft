@@ -41,7 +41,7 @@ class Draw extends BaseController
      * @throws \think\exception\DbException
      * @throws \think\exception\PDOException
      */
-    public function  draw($account=0,$type='bsc',$currency='usdt',$address='',$pay_password=''){
+    public function  draw($account=0,$type='bsc',$currency='ftc',$address='',$pay_password=''){
         return json($this->drawLogic->draw($this->userInfo,$account,$type,$currency,$address,$pay_password));
     }
 

@@ -107,7 +107,11 @@ class AccountLogic
     public function  subFtc($userInfo,$currency_id,$account,$bill_type,$remark){
         Db::startTrans();
         $web3 = new Web3Logic();
-        $web3->withdraw($userInfo['bsc_wallet_address'],$account);
+        $ret = $web3->withdraw($userInfo['bsc_wallet_address'],$account);
+        if($ret && $ret['code']!=1){
+            Db::rollback();
+            return false;
+        }
         $where = ['uid'=>$userInfo['id'],'currency_id'=>$currency_id];
         $accountInfo = $this->userAccountData->where($where)->lock(true)->find();
         if(empty($accountInfo)) return false;

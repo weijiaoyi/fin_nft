@@ -112,7 +112,7 @@ class Web3Logic
             if ($transaction) {
                 return $transaction;
             } else {
-                echo "Sleep one second and wait transaction to be confirmed" . PHP_EOL;
+                //echo "Sleep one second and wait transaction to be confirmed" . PHP_EOL;
                 sleep(1);
             }
             $i++;
