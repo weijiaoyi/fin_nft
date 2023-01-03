@@ -50,9 +50,16 @@ class DrawLogic
      * @throws \think\exception\DbException
      * @throws \think\exception\PDOException
      */
-       public function  draw($userInfo,$account,$type,$currency='',$address=''){
-           if($account==0 || empty($type) || empty($currency)){
+       public function  draw($userInfo,$account,$type,$currency='',$address='',$pay_password){
+           if($account==0 || empty($type) || empty($currency) || empty($pay_password)){
                return Response::invalidParam();
+           }
+           $password = md5(md5($pay_password) . $userInfo['pay_salt']);
+           if(empty($userInfo['pay_password'])){
+               return Response::fail('请先设置支付密码');
+           }
+           if($password!=$userInfo['pay_password']){
+               return Response::fail('支付密码错误');
            }
          $field = ['cd.*','c.name'];
          $currency_id  = 1;
