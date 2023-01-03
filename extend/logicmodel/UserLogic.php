@@ -312,7 +312,7 @@ class UserLogic
             $trc_wallet_address = $account['trc_wallet_address'];
             $erc_wallet_address = $account['erc_wallet_address'];
         }
-        $data['head_image'] = $userInfo['head_image'];
+        $data['head_image'] = $userInfo['head_image'] ? $userInfo['head_image'] : config('site.default_image');
         $data['nick_name'] = $userInfo['nick_name'];
         $data['uuid'] = $userInfo['uuid'];
         $data['total_direct'] = $userInfo['total_direct'];
