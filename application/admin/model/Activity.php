@@ -73,7 +73,7 @@ class Activity extends Model
         $goodsMangheConfigModel = new GoodsMangheConfig();
         $goodsMangheList = $goodsMangheConfigModel->alias('c')
             ->join('goods g', 'g.id = c.combination_goods_id')
-            ->field(['g.image', 'g.price','g.level','g.part'])
+            ->field(['g.image', 'g.price','g.level','g.part','c.*'])
             ->where(['c.goods_id' => $data['goods_id']])
             ->select();
         $data['special'] = [];
