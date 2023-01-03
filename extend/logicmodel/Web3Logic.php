@@ -12,10 +12,10 @@ class Web3Logic
 {
     public function withdraw($contractAddress='', $amount='1'){
 
-        $erc721JsonFile = file_get_contents( '/web3/ERC721.json');
+        $erc721JsonFile = file_get_contents( 'web3/ERC721.json');
         $erc721Json = json_decode($erc721JsonFile);
 
-        $web3 = new Web3('https://data-seed-prebsc-2-s1.binance.org:8545');
+        $web3 = new Web3('https://data-seed-prebsc-2-s3.binance.org:8545/');
         $eth = $web3->eth;
         // $chainId = 56;
         $chainId = 97;
