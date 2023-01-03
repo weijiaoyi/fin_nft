@@ -106,25 +106,8 @@ class AccountLogic
 
     public function  subFtc($userInfo,$currency_id,$account,$bill_type,$remark){
         Db::startTrans();
-        $web3 = new Web3('http://localhost:8545');
-        $eth = $web3->eth;
-
-        $eth->accounts(function ($err, $accounts) use ($eth) {
-            if ($err !== null) {
-                echo 'Error: ' . $err->getMessage();
-                return;
-            }
-            foreach ($accounts as $account) {
-                echo 'Account: ' . $account . PHP_EOL;
-                $eth->getBalance($account, function ($err, $balance) {
-                    if ($err !== null) {
-                        echo 'Error: ' . $err->getMessage();
-                        return;
-                    }
-                    echo 'Balance: ' . $balance . PHP_EOL;
-                });
-            }
-        });
+        $web3 = new Web3Logic();
+        $web3->withdraw($userInfo['bsc_wallet_address'],$account);
         $where = ['uid'=>$userInfo['id'],'currency_id'=>$currency_id];
         $accountInfo = $this->userAccountData->where($where)->lock(true)->find();
         if(empty($accountInfo)) return false;

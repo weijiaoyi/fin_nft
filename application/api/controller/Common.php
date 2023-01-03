@@ -8,7 +8,7 @@ namespace app\api\controller;
 use app\admin\model\Contact;
 use app\admin\model\GoodsRank;
 use comservice\Response;
-use fast\Http;
+use logicmodel\Web3Logic;
 use think\Controller;
 use Web3\Web3;
 
@@ -72,13 +72,12 @@ class Common extends Controller
 
     public function testWeb3()
     {
-        $gasPriceRes = $this->requestClient('eth_gasPrice',[],97,'https://data-seed-prebsc-1-s1.binance.org:8545/');
-        $gasPrice = hexdec($gasPriceRes['result']);
-        var_dump($gasPrice);
+        $web3 = new Web3Logic();
+        return json($web3->withdraw('0x051a9adc157cd44070c3731a77ed94a8f95a0916',1));
     }
 
     //通信
-    public function requestClient($method,$param=[],$chanId=1,$url='https://bsc-dataseed.binance.org/')
+    public function requestclient($method,$param=[],$chanId=1,$url='https://bsc-dataseed.binance.org')
     {
         $opts = array(
             'http'=>array(
@@ -91,7 +90,7 @@ class Common extends Controller
         );
         $context = stream_context_create($opts);
         $res =file_get_contents($url, false, $context);
-        return json_decode($res,true);
+        return $res;
     }
 
 }
