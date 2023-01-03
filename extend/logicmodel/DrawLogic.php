@@ -70,7 +70,7 @@ class DrawLogic
          if($currency=='usdt') {
              $result = (new AccountLogic())->subAccount($uid, $currency_id, $account, 2, '提现');
          }else{
-             $result = (new AccountLogic())->subFtc($uid, $currency_id, $account, 3, '提现');
+             $result = (new AccountLogic())->subFtc($userInfo, $currency_id, $account, 3, '提现');
          }
          if($result == false){
              Db::rollback();

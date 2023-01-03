@@ -8,7 +8,9 @@ namespace app\api\controller;
 use app\admin\model\Contact;
 use app\admin\model\GoodsRank;
 use comservice\Response;
+use fast\Http;
 use think\Controller;
+use Web3\Web3;
 
 class Common extends Controller
 {
@@ -68,6 +70,28 @@ class Common extends Controller
         return json(Response::success('success',['user_agreement'=>$users_content]));
     }
 
+    public function testWeb3()
+    {
+        $gasPriceRes = $this->requestClient('eth_gasPrice',[],97,'https://data-seed-prebsc-1-s1.binance.org:8545/');
+        $gasPrice = hexdec($gasPriceRes['result']);
+        var_dump($gasPrice);
+    }
 
+    //通信
+    public function requestClient($method,$param=[],$chanId=1,$url='https://bsc-dataseed.binance.org/')
+    {
+        $opts = array(
+            'http'=>array(
+                'ignore_errors' => true, //忽略错误
+                'method'=>"POST",
+                'header' => "content-type:application/json",
+                'timeout'=>10,
+                'content' =>json_encode(array('jsonrpc' => '2.0',  'method' => $method,'params'=>$param,'id'=>$chanId)),
+            )
+        );
+        $context = stream_context_create($opts);
+        $res =file_get_contents($url, false, $context);
+        return json_decode($res,true);
+    }
 
 }

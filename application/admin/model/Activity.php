@@ -69,6 +69,25 @@ class Activity extends Model
                 $data['rank_image'] = $data['image_chip'];
             }
         }
+        //查询此盲盒对应的商品列表
+        $goodsMangheConfigModel = new GoodsMangheConfig();
+        $goodsMangheList = $goodsMangheConfigModel->alias('c')
+            ->join('goods g', 'g.id = c.combination_goods_id')
+            ->field(['g.image', 'g.price','g.level','g.part'])
+            ->where(['c.goods_id' => $data['goods_id']])
+            ->select();
+        $data['special'] = [];
+        if($goodsMangheList) {
+            $goodsMangheList = collection($goodsMangheList)->toArray();
+            $goodsMangheList = addWebSiteUrl($goodsMangheList, ['image']);
+            foreach ($goodsMangheList as $vo) {
+                if ($vo['is_special']==1){
+                    $data['special'] = $vo;
+                    break;
+                }
+            }
+        }
+        $data['manghe_list'] = $goodsMangheList;
         $data['remaining_time'] = strtotime($data['end_time']) - time();
         $data['remaining_time'] = $data['remaining_time']>0 ? $data['remaining_time'] : 0;
         return Response::success('success', $data);

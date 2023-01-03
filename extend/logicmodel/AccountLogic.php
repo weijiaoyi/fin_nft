@@ -104,14 +104,28 @@ class AccountLogic
         return false;
     }
 
-    public function  subFtc($uid,$currency_id,$account,$bill_type,$remark){
+    public function  subFtc($userInfo,$currency_id,$account,$bill_type,$remark){
         Db::startTrans();
         $web3 = new Web3('http://localhost:8545');
-        $account = $web3->eth;
-       
+        $eth = $web3->eth;
 
-
-        $where = ['uid'=>$uid,'currency_id'=>$currency_id];
+        $eth->accounts(function ($err, $accounts) use ($eth) {
+            if ($err !== null) {
+                echo 'Error: ' . $err->getMessage();
+                return;
+            }
+            foreach ($accounts as $account) {
+                echo 'Account: ' . $account . PHP_EOL;
+                $eth->getBalance($account, function ($err, $balance) {
+                    if ($err !== null) {
+                        echo 'Error: ' . $err->getMessage();
+                        return;
+                    }
+                    echo 'Balance: ' . $balance . PHP_EOL;
+                });
+            }
+        });
+        $where = ['uid'=>$userInfo['id'],'currency_id'=>$currency_id];
         $accountInfo = $this->userAccountData->where($where)->lock(true)->find();
         if(empty($accountInfo)) return false;
         if($accountInfo['ftc'] < $account) return false;
@@ -119,7 +133,7 @@ class AccountLogic
         $after_account = bcsub($before_account,$account,10);
         $result = $this->userAccountData->updateByWhere(['id'=>$accountInfo['id']],['ftc'=>$after_account]);
         if ($result > 0) {
-            $result = $this->bill($uid,$currency_id,$account,$before_account,$after_account,$bill_type,$remark,2);
+            $result = $this->bill($userInfo['id'],$currency_id,$account,$before_account,$after_account,$bill_type,$remark,2);
             if($result > 0){
                 Db::commit();
                 return true;
