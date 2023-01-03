@@ -77,6 +77,7 @@ class DrawLogic
          if($currency=='usdt') {
              $result = (new AccountLogic())->subAccount($uid, $currency_id, $account, 2, '提现');
          }else{
+             $currency_id = 2;
              $result = (new AccountLogic())->subFtc($userInfo, $account, 3, '提现');
          }
          if($result == false){
