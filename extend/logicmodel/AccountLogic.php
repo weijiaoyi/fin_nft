@@ -7,6 +7,7 @@ namespace logicmodel;
 use comservice\Response;
 use datamodel\Bill;
 use datamodel\Currency;
+use datamodel\Users;
 use datamodel\UsersAccount;
 use think\Db;
 use Web3\Web3;
@@ -93,6 +94,7 @@ class AccountLogic
         $after_account = bcsub($before_account,$account,10);
         Db::startTrans();
         $result = $this->userAccountData->updateByWhere(['id'=>$accountInfo['id']],['account'=>$after_account]);
+        Users::where('id',$uid)->setDec('usdt',$account);
         if ($result > 0) {
             $result = $this->bill($uid,$currency_id,$account,$before_account,$after_account,$bill_type,$remark,2);
             if($result > 0){
@@ -119,6 +121,7 @@ class AccountLogic
         $before_account = $accountInfo['ftc']; //变动前总账户
         $after_account = bcsub($before_account,$account,10);
         $result = $this->userAccountData->updateByWhere(['id'=>$accountInfo['id']],['ftc'=>$after_account]);
+        Users::where('id',$userInfo['id'])->setDec('ftc',$account);
         if ($result > 0) {
             $result = $this->bill($userInfo['id'],$currency_id,$account,$before_account,$after_account,$bill_type,$remark,2);
             if($result > 0){
