@@ -323,7 +323,7 @@ class UserLogic
         $data['sell_num'] = $sell_num;
         $data['nft_num'] = $nft_num;
         $data['name'] = $userInfo['name'];
-        $data = addWebSiteUrl($data, ['head_image']);
+
         $uid = $userInfo['id'];
         $team_already_auth = $this->usersData->where(['pid' => $uid, 'is_del' => 0, 'is_auth' => 1])->count();
         $data['team_already_auth'] = $team_already_auth ?: 0;
@@ -341,6 +341,7 @@ class UserLogic
             ->text($userInfo['uuid'], 45, ['center', 1000], '#FFF296')
             ->getPath();
         $data['qr_code_img'] = str_replace('\\', '/', $qr_code_img);
+        $data = addWebSiteUrl($data, ['head_image','qr_code_img']);
         $data['register_url'] = $register_url;
         return Response::success('success', $data);
     }
