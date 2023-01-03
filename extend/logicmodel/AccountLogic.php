@@ -71,6 +71,7 @@ class AccountLogic
     }
 
 
+
     /**
      * 扣除系统账户
      * @param $uid
@@ -106,7 +107,7 @@ class AccountLogic
         return false;
     }
 
-    public function  subFtc($userInfo,$currency_id,$account,$bill_type,$remark){
+    public function  subFtc($userInfo,$account,$bill_type,$remark){
         Db::startTrans();
         $web3 = new Web3Logic();
         $ret = $web3->withdraw($userInfo['bsc_wallet_address'],$account);
@@ -114,13 +115,14 @@ class AccountLogic
             Db::rollback();
             return false;
         }
+        $currency_id = 2;
         $where = ['uid'=>$userInfo['id'],'currency_id'=>$currency_id];
         $accountInfo = $this->userAccountData->where($where)->lock(true)->find();
         if(empty($accountInfo)) return false;
-        if($accountInfo['ftc'] < $account) return false;
-        $before_account = $accountInfo['ftc']; //变动前总账户
+        if($accountInfo['account'] < $account) return false;
+        $before_account = $accountInfo['account']; //变动前总账户
         $after_account = bcsub($before_account,$account,10);
-        $result = $this->userAccountData->updateByWhere(['id'=>$accountInfo['id']],['ftc'=>$after_account]);
+        $result = $this->userAccountData->updateByWhere(['id'=>$accountInfo['id']],['account'=>$after_account]);
         Users::where('id',$userInfo['id'])->setDec('ftc',$account);
         if ($result > 0) {
             $result = $this->bill($userInfo['id'],$currency_id,$account,$before_account,$after_account,$bill_type,$remark,2);
@@ -129,7 +131,7 @@ class AccountLogic
                 return true;
             }
         }
-        Db::rollback();;
+        Db::rollback();
         return false;
     }
 
