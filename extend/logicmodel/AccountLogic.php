@@ -95,7 +95,7 @@ class AccountLogic
         $after_account = bcsub($before_account,$account,10);
         Db::startTrans();
         $result = $this->userAccountData->updateByWhere(['id'=>$accountInfo['id']],['account'=>$after_account]);
-        Users::where('id',$uid)->setDec('usdt',$account);
+        Users::where('id',$uid)->setDec('account',$account);
         if ($result > 0) {
             $result = $this->bill($uid,$currency_id,$account,$before_account,$after_account,$bill_type,$remark,2);
             if($result > 0){
