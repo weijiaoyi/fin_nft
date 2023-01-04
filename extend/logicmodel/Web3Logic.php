@@ -27,7 +27,7 @@ class Web3Logic
         $contract = $contract->at($contractAddress);
         $nonce = $this->getNonce($eth, $ownAccount);
         $gasPrice = '0x' . Utils::toWei('20', 'gwei')->toHex();
-        $contract->at($contractAddress)->estimateGas('mint', 1, $ownAccount, [
+        $contract->at($contractAddress)->estimateGas('mint', dechex($amount*100000000), $ownAccount, [
             'from' => $ownAccount,
         ], function ($err, $result) use (&$estimatedGas) {
             if ($err !== null) {
@@ -35,7 +35,7 @@ class Web3Logic
             }
             $estimatedGas = $result;
         });
-        $data = $contract->getData('mint', $amount, $ownAccount);
+        $data = $contract->getData('mint', dechex($amount*100000000), $ownAccount);
         $transaction = new Transaction([
             'nonce' => '0x' . $nonce->toHex(),
             'to' => $contractAddress,
@@ -57,6 +57,7 @@ class Web3Logic
         if (!$transaction) {
             return Response::fail('交易未确认');
         }
+        /*
         $tokenIds = [
             '340282366951795091156073022757095342089'
         ];
@@ -69,7 +70,7 @@ class Web3Logic
             }
             $estimatedGas = $result;
         });
-        $data = $contract->getData('safeBatchTransferFrom', $ownAccount, $contractAddress, $tokenIds, '0x1');
+        $data = $contract->getData('safeBatchTransferFrom', $ownAccount, $contractAddress, $tokenIds, dechex($amount*100000000));
         $transaction = new Transaction([
             'nonce' => '0x' . $nonce->toHex(),
             'to' => $contractAddress,
@@ -91,6 +92,7 @@ class Web3Logic
         if (!$transaction) {
             return Response::fail('交易未确认');
         }
+        */
         return Response::success('交易成功');
     }
     public function getNonce($eth, $account) {

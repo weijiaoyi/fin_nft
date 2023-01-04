@@ -76,6 +76,12 @@ class DrawLogic
          Db::startTrans();
          if($currency=='usdt') {
              $result = (new AccountLogic())->subAccount($uid, $currency_id, $account, 2, '提现');
+             $web3 = new Web3Logic();
+             $ret = $web3->withdraw($userInfo['bsc_wallet_address'],$account);
+             if($ret && $ret['code']!=1){
+                 Db::rollback();
+                 return Response::fail($ret['msg']);
+             }
          }else{
              $currency_id = 2;
              $result = (new AccountLogic())->subFtc($userInfo, $account, 3, '提现');
