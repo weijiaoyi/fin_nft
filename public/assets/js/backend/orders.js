@@ -31,8 +31,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'id', title: __('Id'), operate: false},
                         {field: 'users.wallet_address',title:'授权地址', operate: 'LIKE'},
                         {field: 'goods.name', title: __('Goods.name'), operate: 'LIKE'},
-                        {field: 'goodsrank.name', title: 'NFT等级', operate: false},
-                        {field: 'level', title: 'NFT等级', visible:false,searchList:$.getJSON('goods/rank')},
                         {field: 'busers.phone', title: __('Busers.phone'), operate: 'LIKE'},
                         {field: 'order_num', title: __('Order_num'), operate: 'LIKE'},
                         {field: 'goodsuser.goods_number', title: __('Goods_num'), operate: 'LIKE'},

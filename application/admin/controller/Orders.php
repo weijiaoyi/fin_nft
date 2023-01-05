@@ -71,8 +71,6 @@ class Orders extends Backend
                 $row->getRelation('busers')->visible(['phone']);
                 $row->visible(['goodsuser']);
                 $row->getRelation('goodsuser')->visible(['goods_number']);
-                $row->visible(['goodsrank']);
-                $row->getRelation('goodsrank')->visible(['name']);
             }
 
             $result = array("total" => $list->total(), "rows" => $list->items());

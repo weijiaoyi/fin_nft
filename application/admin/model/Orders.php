@@ -78,8 +78,4 @@ class Orders extends Model
         return $this->belongsTo('Users', 'buy_uid', 'id', [], 'LEFT')->setEagerlyType(0);
     }
 
-    public function goodsrank()
-    {
-        return $this->belongsTo('GoodsRank', 'level', 'id', [], 'LEFT')->setEagerlyType(0);
-    }
 }
