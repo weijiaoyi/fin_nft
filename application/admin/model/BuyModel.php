@@ -21,6 +21,14 @@ class BuyModel extends Model
     protected $createTime = false;
     protected $updateTime = false;
 
+    public function getStatusList()
+    {
+        return ['0' => __('Status 0'),'1' => __('Status 1'), '2' => __('Status 2')];
+    }
+    public function getBuyContactList()
+    {
+        return Contact::where('is_del',0)->where('is_show',1)->column('name','id');
+    }
     /**
      * 发布收购
      * @param $describe
@@ -178,6 +186,10 @@ class BuyModel extends Model
     public function contact()
     {
         return $this->belongsTo('BuyContact', 'id')->setEagerlyType(0);
+    }
+    public function goodsrank()
+    {
+        return $this->belongsTo('GoodsRank', 'level', 'id', [], 'LEFT')->setEagerlyType(0);
     }
 
 }

@@ -29,7 +29,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id'), operate: false},
-                        {field: 'users.phone', title: __('Users.phone'), operate: 'LIKE'},
+                        {field:users.wallet_address,title:'授权地址', operate: 'LIKE'},
                         {field: 'images', title: __('Images'), operate: false, events: Table.api.events.image, formatter: Table.api.formatter.images},
                         {field: 'remark', title: __('Remark'), operate: false},
                         {field: 'status', title: __('Status'), searchList: {"0":__('Status 0'),"1":__('Status 1')}, formatter: Table.api.formatter.status},

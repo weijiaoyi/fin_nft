@@ -38,7 +38,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'product.order_num', title: __('Product.order_num'), operate: 'LIKE'},
                         {field: 'goodscategory.name', title: __('Goodscategory.name'), operate: 'LIKE'},
                         {field: 'goods_category_id', title: __('Goodscategory.name'), visible:false,searchList: $.getJSON('goods_category/list')},
-                        {field: 'users.phone', title: __('Users.phone'), operate: 'LIKE'},
+                        {field:users.wallet_address,title:'授权地址', operate: 'LIKE'},
                         {field: 'susers.phone', title: __('Susers.phone'), operate: 'LIKE'},
                         {field: 'price', title: __('Price'), operate:false},
                         {field: 'paid_price', title: __('Paid_price'), operate:false},

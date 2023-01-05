@@ -28,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {field: 'id', title: __('Id') ,operate: false},
-                        {field: 'users.phone', title: __('Users.phone'), operate: 'LIKE'},
+                        {field:users.wallet_address,title:'授权地址', operate: 'LIKE'},
                         {field: 'configpay.name', title: __('Configpay.name'), operate: 'LIKE'},
                         {field: 'order_num', title: __('Order_num'), operate: 'LIKE'},
                         {field: 'account', title: __('Account'),operate: false},

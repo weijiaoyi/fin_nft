@@ -13,7 +13,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 });
                 return false;
             });
-            
+
             // 初始化表格参数配置
             Table.api.init({
                                 search: false,
@@ -43,7 +43,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                                                 // {checkbox: true},
                         {field: 'id', title: __('Id'), operate: false},
-                        {field: 'users.phone', title: __('Users.phone'), operate: 'LIKE'},
+                        {field:users.wallet_address,title:'授权地址', operate: 'LIKE'},
                         {field: 'anchor_nickname', title: __('Anchor_nickname'), operate: 'LIKE'},
                         {field: 'anchor_dou_number', title: __('Anchor_dou_number'), operate: 'LIKE'},
                         {field: 'anchor_order_name', title: __('Anchor_order_name'), operate: 'LIKE'},
@@ -120,8 +120,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         refuses: function () {
             Controller.api.bindevent();
-        },        
-        
+        },
+
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));

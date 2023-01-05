@@ -46,6 +46,24 @@ class Draw extends BaseController
     }
 
     /**
+     * 合约提现
+     * @param int $account
+     * @param string $type
+     * @param string $currency
+     * @param string $address
+     * @param string $pay_password
+     * @return \think\response\Json
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @throws \think\exception\PDOException
+     */
+    public function  drawContract($id,$pay_password=''){
+        return json($this->drawLogic->drawcContract($this->userInfo,$id,$pay_password));
+    }
+
+    /**
      * 提现记录
      * @return \think\response\Json
      * @throws \think\Exception

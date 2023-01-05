@@ -27,7 +27,9 @@ class Web3Logic
         $contract = $contract->at($contractAddress);
         $nonce = $this->getNonce($eth, $ownAccount);
         $gasPrice = '0x' . Utils::toWei('20', 'gwei')->toHex();
-        $contract->at($contractAddress)->estimateGas('mint', dechex($amount*100000000), $ownAccount, [
+
+        //'Start to mint erc721' . PHP_EOL;
+        $contract->at($contractAddress)->estimateGas('mint', $amount, $ownAccount, [
             'from' => $ownAccount,
         ], function ($err, $result) use (&$estimatedGas) {
             if ($err !== null) {
@@ -35,7 +37,7 @@ class Web3Logic
             }
             $estimatedGas = $result;
         });
-        $data = $contract->getData('mint', dechex($amount*100000000), $ownAccount);
+        $data = $contract->getData('mint',$amount, $ownAccount);
         $transaction = new Transaction([
             'nonce' => '0x' . $nonce->toHex(),
             'to' => $contractAddress,
@@ -57,6 +59,7 @@ class Web3Logic
         if (!$transaction) {
             return Response::fail('交易未确认');
         }
+        // "Minted!!!" . PHP_EOL;
         /*
         $tokenIds = [
             '340282366951795091156073022757095342089'

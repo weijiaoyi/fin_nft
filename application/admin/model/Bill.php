@@ -8,13 +8,13 @@ use think\Model;
 class Bill extends Model
 {
 
-    
 
-    
+
+
 
     // 表名
     protected $name = 'bill';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
 
@@ -27,13 +27,14 @@ class Bill extends Model
     protected $append = [
         'type_text'
     ];
-    
 
-    
+
+
     public function getTypeList()
     {
         return ['1' => __('Type 1'), '2' => __('Type 2')];
     }
+
 
 
     public function getTypeTextAttr($value, $data)

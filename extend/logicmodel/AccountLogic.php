@@ -61,6 +61,7 @@ class AccountLogic
             $before_account = 0;
             $after_account = $account;
         }
+        Users::where('id',$uid)->setInc('account',$account);
         $result =  $this->bill($uid,$currency_id,$account,$before_account,$after_account,$bill_type,$remark,1);
         if($result > 0){
             Db::commit();

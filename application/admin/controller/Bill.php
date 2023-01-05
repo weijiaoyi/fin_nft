@@ -5,13 +5,13 @@ namespace app\admin\controller;
 use app\common\controller\Backend;
 
 /**
- * 
+ *
  *
  * @icon fa fa-circle-o
  */
 class Bill extends Backend
 {
-    
+
     /**
      * Bill模型对象
      * @var \app\admin\model\Bill
@@ -35,7 +35,7 @@ class Bill extends Backend
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
-    
+
 
     /**
      * 查看
@@ -64,7 +64,7 @@ class Bill extends Backend
                 $row->visible(['currency']);
 				$row->getRelation('currency')->visible(['name']);
 				$row->visible(['users']);
-				$row->getRelation('users')->visible(['member']);
+				$row->getRelation('users')->visible(['wallet_address']);
             }
 
             $result = array("total" => $list->total(), "rows" => $list->items());

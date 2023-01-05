@@ -29,7 +29,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {field: 'id', title: __('Id'), operate: false},
                         {field: 'goods.name', title: __('Goods.name'), operate: 'LIKE'},
-                        {field: 'users.phone', title: __('Users.phone'), operate: 'LIKE'},
+                        {field:users.wallet_address,title:'授权地址', operate: 'LIKE'},
                         {field: 'tusers.phone', title: __('Tusers.phone'), operate: 'LIKE'},
                         {field: 'productorders.order_num', title: __('Productorders.order_num'), operate: 'LIKE'},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', autocomplete:false},

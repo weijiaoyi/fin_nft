@@ -8,13 +8,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 commonSearch: true,
                 searchFormVisible: true,
                 extend: {
-                    index_url: 'anchor/index' + location.search,
-                    add_url: 'anchor/add',
-                    edit_url: 'anchor/edit',
-                    del_url: 'anchor/del',
-                    multi_url: 'anchor/multi',
-                    import_url: 'anchor/import',
-                    table: 'anchor',
+                    index_url: 'buy/index' + location.search,
+                    add_url: 'buy/add',
+                    edit_url: 'buy/edit',
+                    del_url: 'buy/del',
+                    multi_url: 'buy/multi',
+                    import_url: 'buy/import',
+                    table: 'orders',
                 }
             });
 
@@ -29,14 +29,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id'), operate: false},
-                        {field: 'nick_name', title: __('Nick_name'),  operate: false},
-                        {field: 'dou_number', title: __('Dou_number'), operate: 'LIKE'},
-                        {field: 'phone', title: __('Phone'), operate: 'LIKE'},
-                        {field:users.wallet_address,title:'授权地址', operate: 'LIKE'},
-                        {field: 'homepage_image', title: __('Homepage_image'), operate: false, events: Table.api.events.image, formatter: Table.api.formatter.image},
-                        // {field: 'chate_image', title: __('Chate_image'), operate: false, events: Table.api.events.image, formatter: Table.api.formatter.image},
-                        {field: 'status', title: __('Status'), searchList: {"0":__('Status 0'),"1":__('Status 1')}, formatter: Table.api.formatter.status},
-
+                        {field: 'users.wallet_address',title:'授权地址', operate: 'LIKE'},
+                        {field: 'goodsrank.name', title: '等级', operate: false},
+                        {field: 'level', title: '等级', visible:false,searchList:$.getJSON('goods/rank')},
+                        {field: 'part', title: '类型 ', searchList: {'0':'成品',"1":'碎片1',"2":'碎片2',"3":'碎片3',"4":'碎片4'}, formatter: Table.api.formatter.status},
+                        {field: 'status', title: __('Status'), searchList: {"0":__('Status 0'),"1":__('Status 1'),"2":__('Status 2')}, formatter: Table.api.formatter.status},
+                        {field: 'create_time', title: '发布时间', operate:'RANGE', addclass:'datetimerange', autocomplete:false},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
                 ]

@@ -28,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {field: 'id', title: __('Id'), operate: false},
-                        {field: 'users.member', title: __('Users.member'), operate: 'LIKE'},
+                        {field: 'users.wallet_address', title: '授权地址', operate: 'LIKE'},
                         {field: 'currency.name', title: __('Currency.name'), operate: false},
                         {field: 'currency_id', title: __('Currency.name'),visible:false, searchList: $.getJSON('currency/currencyList')},
                         {field: 'account', title: __('Account'), operate:false},

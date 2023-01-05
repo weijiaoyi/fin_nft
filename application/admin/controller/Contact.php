@@ -70,6 +70,10 @@ class Contact extends Backend
         }
         return $this->view->fetch();
     }
+    public function list()
+    {
+        return json($this->model->where(['is_del' => 0,'is_show'=>1])->select());
+    }
     public function del($ids = "")
     {
         $result = $this->model->where(['id'=>['in',$ids]])->update(['is_del'=>1]);

@@ -65,16 +65,13 @@ class Users extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $list = $this->model
-                ->with(['role'])
                 ->where(['is_del'=>0])
                 ->where($where)
                 ->order($sort, $order)
                 ->paginate($limit);
 
             foreach ($list as $row) {
-                $row->visible(['id','member','nick_name','head_image','phone','status','uuid','total_direct','group_person_count','achievement_money','group_achievement_money','parent_member','create_time','name','card','is_bank','is_wx','is_ali','wholesale_account','award_recommend','wallet_address']);
-                $row->visible(['role']);
-                $row->getRelation('role')->visible(['name']);
+                $row->visible(['id','nick_name','account','head_image','status','uuid','create_time','trc_wallet_address','erc_wallet_address','bsc_wallet_address','wallet_address']);
             }
 
             $result = array("total" => $list->total(), "rows" => $list->items());
@@ -212,13 +209,12 @@ class Users extends Backend
             if($account <= 0) return json(['code'=>0,'msg'=>'操作金额需大于0']);
             $type = $data['type'];
             $currency_id = $data['currency_id'];
+            $bil_type = 10;
             Db::startTrans();
             if($type == 1){
                 $currency_id = $data['currency_id'];
                 //充值
-                $bil_type = '后台充值';
                 $remark = '后台充值';
-
                 $result =  (new AccountLogic())->addAccount($ids,$currency_id,$account,$bil_type,$remark);
                 if($result == false){
                     Db::rollback();
@@ -227,7 +223,6 @@ class Users extends Backend
             }elseif($type == 2){
                 //扣费
                 //充值
-                $bil_type = '后台扣费';
                 $remark = '后台扣费';
                 $result =  (new AccountLogic())->subAccount($ids,$currency_id,$account,$bil_type,$remark);
                 if($result == false){
@@ -318,11 +313,11 @@ class Users extends Backend
             $data = input('post.');
             $goods_id = $data['goods_id'];
            $goods =  (new \app\admin\model\Goods())->where(['id'=>$goods_id,'is_del'=>0])->find();
-           if(empty($goods)) return json(['code'=>0,'msg'=>'藏品信息错误']);
+           if(empty($goods)) return json(['code'=>0,'msg'=>'NFT信息错误']);
             $price = $data['price'];
            if(empty($price)) $price = $goods['price'];
            //生成
-            $user = ['uid'=>$ids,'goods_id'=>$goods_id,'price'=>$price,'create_time'=>date('Y-m-d H:i:s'),'is_send'=>1];
+            $user = ['uid'=>$ids,'goods_id'=>$goods_id,'price'=>$price,'create_time'=>date('Y-m-d H:i:s'),'is_send'=>1,'source'=>3];
             Db::startTrans();
             $result = (new \app\admin\model\GoodsUsers())->insertGetId($user);
             if(!$result){

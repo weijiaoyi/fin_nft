@@ -28,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {field: 'id', title: __('Id'), operate: false},
-                        {field: 'users.phone', title: __('Users.phone'), operate: 'LIKE'},
+                        {field: 'users.wallet_address', title: __('Users.phone'), operate: 'LIKE'},
                         {field: 'goods.name', title: __('Goods.name'), operate: false},
                         {field: 'price', title: __('Price'), operate:false},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', autocomplete:false},

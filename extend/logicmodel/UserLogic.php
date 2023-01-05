@@ -306,7 +306,7 @@ class UserLogic
         $bsc_wallet_address = $userInfo['bsc_wallet_address'];
         $trc_wallet_address = $userInfo['trc_wallet_address'];
         $erc_wallet_address = $userInfo['erc_wallet_address'];
-        if(empty($userInfo['bsc_wallet_address'])) {
+        if(empty($userInfo['bsc_wallet_address']) || empty($userInfo['trc_wallet_address']) || empty($userInfo['erc_wallet_address'])) {
             $account = $this->getAccountAddress($userInfo['id']);
             $bsc_wallet_address = $account['bsc_wallet_address'];
             $trc_wallet_address = $account['trc_wallet_address'];

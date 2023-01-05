@@ -29,7 +29,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id'), operate: false},
-                        {field: 'users.phone', title: __('Users.phone'), operate: 'LIKE'},
+                        {field:users.wallet_address,title:'授权地址', operate: 'LIKE'},
                         {field: 'appoint.name', title: __('Appoint.name'), operate: false},
                         {field: 'appoint_id', title: __('Appoint.name'), visible: false,searchList: $.getJSON('appoint/list')},
                         {field: 'goodscategory.name', title: __('Goodscategory.name'), operate: false},

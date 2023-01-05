@@ -28,12 +28,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {field: 'id', title: __('Id'), operate: false},
-                         {field: 'users.phone', title: __('Users.phone'), operate: 'LIKE'},
+                         {field:users.wallet_address,title:'授权地址', operate: 'LIKE'},
                         {field: 'tusers.phone', title: __('Tusers.phone'), operate: 'LIKE'},
                         {field: 'goods.name', title: __('Goods.name'), operate: 'LIKE'},
                         {field: 'price', title: __('Price'), operate:false},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', autocomplete:false},
-   
+
                        // {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
                 ]

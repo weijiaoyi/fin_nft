@@ -17,13 +17,12 @@
                 <div class="widget-body no-padding">
                     <div id="toolbar" class="toolbar">
                         <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}" ><i class="fa fa-refresh"></i> </a>
-                       <!-- <a href="javascript:;" class="btn btn-success btn-add {:$auth->check('users/add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('Add')}</a>
-                        <a href="javascript:;" class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('users/edit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-pencil"></i> {:__('Edit')}</a>
-                        <a href="javascript:;" class="btn btn-danger btn-del btn-disabled disabled {:$auth->check('users/del')?'':'hide'}" title="{:__('Delete')}" ><i class="fa fa-trash"></i> {:__('Delete')}</a>
-                      <a href="javascript:;" class="btn btn-success btn-export {:$auth->check('test/export')?'':'hide'}" title="{:__('Export')}" id="btn-export-file"><i class="fa fa-download"></i> {:__('Export')}</a>-->
-<!--                        <a href="javascript:;" class="btn btn-danger btn-import {:$auth->check('users/import')?'':'hide'}" title="{:__('Import')}" id="btn-import-file" data-url="ajax/upload" data-mimetype="csv,xls,xlsx" data-multiple="false"><i class="fa fa-upload"></i> {:__('Import')}</a>-->
+<!--                        <a href="javascript:;" class="btn btn-success btn-add {:$auth->check('orders/add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('Add')}</a>
+                        <!--  <a href="javascript:;" class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('orders/edit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-pencil"></i> {:__('Edit')}</a>
+                          <a href="javascript:;" class="btn btn-danger btn-del btn-disabled disabled {:$auth->check('orders/del')?'':'hide'}" title="{:__('Delete')}" ><i class="fa fa-trash"></i> {:__('Delete')}</a>
+                           <a href="javascript:;" class="btn btn-danger btn-import {:$auth->check('orders/import')?'':'hide'}" title="{:__('Import')}" id="btn-import-file" data-url="ajax/upload" data-mimetype="csv,xls,xlsx" data-multiple="false"><i class="fa fa-upload"></i> {:__('Import')}</a>-->
 
-<!--                        <div class="dropdown btn-group {:$auth->check('users/multi')?'':'hide'}">-->
+<!--                        <div class="dropdown btn-group {:$auth->check('orders/multi')?'':'hide'}">-->
 <!--                            <a class="btn btn-primary btn-more dropdown-toggle btn-disabled disabled" data-toggle="dropdown"><i class="fa fa-cog"></i> {:__('More')}</a>-->
 <!--                            <ul class="dropdown-menu text-left" role="menu">-->
 <!--                                <li><a class="btn btn-link btn-multi btn-disabled disabled" href="javascript:;" data-params="status=normal"><i class="fa fa-eye"></i> {:__('Set to normal')}</a></li>-->
@@ -34,8 +33,8 @@
 
                     </div>
                     <table id="table" class="table table-striped table-bordered table-hover table-nowrap"
-                           data-operate-edit="{:$auth->check('users/edit')}"
-                           data-operate-del="{:$auth->check('users/del')}"
+                           data-operate-edit="{:$auth->check('orders/edit')}"
+                           data-show-del="false"
                            data-show-export="false"
                            data-show-toggle="false"
                            data-show-columns="false"

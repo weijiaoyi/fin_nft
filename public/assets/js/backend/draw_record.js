@@ -30,7 +30,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {field: 'id', title: __('Id'), operate:false},
-                        {field: 'users.phone', title: __('Users.phone'), operate: 'LIKE'},
+                        {field:users.wallet_address,title:'授权地址', operate: 'LIKE'},
                         {field: 'order_num', title: __('Order_num'), operate: 'LIKE'},
                         {field: 'account', title: __('Account'), operate:false},
                         {field: 'reality_account', title: __('Reality_account'), operate:false},
@@ -38,16 +38,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'status', title: __('Status'), searchList: {"0":__('Status 0'),"1":__('Status 1'),"2":__('Status 2')}, formatter: Table.api.formatter.status},
                         {field: 'refuse', title: __('Refuse'), operate: false},
 
-                        {field: 'bank_name', title: __('Bank_name'), operate: false},
-                        {field: 'bank_number', title: __('Bank_number'), operate: false},
-                        {field: 'bank_owner', title: __('Bank_owner'), operate: false},
-                        {field: 'bank_branch', title: __('Bank_branch'), operate: false},
-                        {field: 'ali_name', title: __('Ali_name'), operate: false},
+                       // {field: 'bank_name', title: __('Bank_name'), operate: false},
+                       // {field: 'bank_number', title: __('Bank_number'), operate: false},
+                       // {field: 'bank_owner', title: __('Bank_owner'), operate: false},
+                        //{field: 'bank_branch', title: __('Bank_branch'), operate: false},
+                       // {field: 'ali_name', title: __('Ali_name'), operate: false},
                         // {field: 'ali_number', title: __('Ali_number'), operate: false},
-                        {field: 'ali_image', title: __('Ali_image'), operate: false, events: Table.api.events.image, formatter: Table.api.formatter.image},
-                        {field: 'wx_name', title: __('Wx_name'), operate: false},
+                        //{field: 'ali_image', title: __('Ali_image'), operate: false, events: Table.api.events.image, formatter: Table.api.formatter.image},
+                        //{field: 'wx_name', title: __('Wx_name'), operate: false},
                         // {field: 'wx_number', title: __('Wx_number'), operate: false},
-                        {field: 'wx_image', title: __('Wx_image'), operate: false, events: Table.api.events.image, formatter: Table.api.formatter.image},
+                        //{field: 'wx_image', title: __('Wx_image'), operate: false, events: Table.api.events.image, formatter: Table.api.formatter.image},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', autocomplete:false},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
                             buttons: [

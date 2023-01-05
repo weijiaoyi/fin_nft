@@ -8,13 +8,13 @@ use think\Model;
 class Orders extends Model
 {
 
-    
 
-    
+
+
 
     // 表名
     protected $name = 'orders';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
 
@@ -28,9 +28,9 @@ class Orders extends Model
         'status_text',
         'pay_type_text'
     ];
-    
 
-    
+
+
     public function getStatusList()
     {
         return ['1' => __('Status 1'), '2' => __('Status 2'), '3' => __('Status 3')];
@@ -76,5 +76,10 @@ class Orders extends Model
     public function busers()
     {
         return $this->belongsTo('Users', 'buy_uid', 'id', [], 'LEFT')->setEagerlyType(0);
+    }
+
+    public function goodsrank()
+    {
+        return $this->belongsTo('GoodsRank', 'level', 'id', [], 'LEFT')->setEagerlyType(0);
     }
 }

@@ -9,22 +9,21 @@ use app\common\controller\Backend;
  *
  * @icon fa fa-circle-o
  */
-class GoodsUsers extends Backend
+class Buy extends Backend
 {
 
     /**
-     * GoodsUsers模型对象
-     * @var \app\admin\model\GoodsUsers
+     * Orders模型对象
+     * @var \app\admin\model\Orders
      */
     protected $model = null;
 
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\GoodsUsers;
+        $this->model = new \app\admin\model\BuyModel;
         $this->view->assign("statusList", $this->model->getStatusList());
-        $this->view->assign("isShowList", $this->model->getIsShowList());
-        $this->view->assign("isDelList", $this->model->getIsDelList());
+        $this->view->assign("BuyContactList", $this->model->getBuyContactList());
     }
 
     public function import()
@@ -56,18 +55,17 @@ class GoodsUsers extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $list = $this->model
-                    ->where(['goods_users.is_del'=>0,'goods_users.status'=>['lt',7]])
-                    ->with(['users','goods'])
+                    ->with(['contact','user','goodsrank'])
                     ->where($where)
                     ->order($sort, $order)
                     ->paginate($limit);
 
             foreach ($list as $row) {
-                $row->visible(['id','goods_number','level','part','price','status','is_show','create_time','order']);
-                $row->visible(['users']);
-				$row->getRelation('users')->visible(['wallet_address']);
-				$row->visible(['goods']);
-				$row->getRelation('goods')->visible(['name']);
+                $row->visible(['id','describe','part','level','remark','create_time','status']);
+				$row->visible(['user']);
+				$row->getRelation('user')->visible(['wallet_address']);
+                $row->visible(['goodsrank']);
+                $row->getRelation('goodsrank')->visible(['name']);
             }
 
             $result = array("total" => $list->total(), "rows" => $list->items());
@@ -76,33 +74,10 @@ class GoodsUsers extends Backend
         }
         return $this->view->fetch();
     }
-
     public function del($ids = "")
     {
         $result = $this->model->where(['id'=>['in',$ids]])->update(['is_del'=>1]);
         if($result) return json(['code'=>1,'msg'=>'删除成功']);
         return json(['code'=>0,'msg'=>'删除失败']);
     }
-    public function add()
-    {
-        if(request()->isPost()){
-            $data = input('post.');
-            $data = $data['row'];
-            $phone = $data['phone'];
-            $user = (new \app\admin\model\Users())->where(['phone'=>$phone,'is_del'=>0])->find();
-            if(empty($user)) return json(['code'=>0,'msg'=>'会员手机号错误']);
-            $goods['goods_number'] = uniqueNum();
-            $goods['uid'] = $user['id'];
-            $goods['goods_id'] = $data['goods_id'];
-            $goods['price'] = $data['price'];
-            $goods['order'] = $data['order'];
-            $goods['status'] = $data['status'];
-            $goods['create_time'] = date('Y-m-d H:i:s');
-            $result = $this->model->insertGetId($goods);
-            if($result) return json(['code'=>1,'msg'=>'添加成功']);
-            return json(['code'=>0,'msg'=>'添加失败']);
-        }
-        return $this->fetch();
-    }
-
 }
