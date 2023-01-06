@@ -3,7 +3,7 @@
 return [
     'Id'                             => 'ID',
     'User_id'                        => '会员ID',
-    'Goods_id'                       => '藏品信息',
+    'Goods_id'                       => 'NFT信息',
     'Status'                         => '中奖状态',
     'Status 0'                       => '未中奖',
     'Status 1'                       => '中奖',

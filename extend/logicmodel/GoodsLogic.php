@@ -77,6 +77,7 @@ class GoodsLogic
         $where['g.is_del'] = 0;
         $where['g.is_show'] = 1;
         $where['g.is_manghe'] = 0; //非盲盒
+        $where['g.is_goods_manghe'] = 0; //非盲盒
         $where['g.is_can_buy'] = 1; //可以参与购买
         if (!empty($search)) $where['g.name|g.label'] = ['like', '%' . $search . '%'];
         $count = $this->goodsData->alias('g')->where($where)->count();

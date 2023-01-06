@@ -43,7 +43,7 @@ class Goods extends Model
 
     public function getIsMangheList()
     {
-        return ['0' => __('藏品'), '1' => __('盲盒')];
+        return ['0' => __('NFT'), '1' => __('盲盒')];
     }
 
     public function getIsCanBuyList()

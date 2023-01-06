@@ -53,9 +53,8 @@ class Buy extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-
             $list = $this->model
-                    ->with(['contact','user','goodsrank'])
+                    ->with(['user','goodsrank'])
                     ->where($where)
                     ->order($sort, $order)
                     ->paginate($limit);

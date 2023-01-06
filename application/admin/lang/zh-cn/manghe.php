@@ -1,11 +1,11 @@
 <?php
 
 return [
-    'Name'             => '藏品名字',
-    'Title'            => '藏品简介',
-    'Image'            => '藏品展示图',
-    'Images'           => '藏品轮播图',
-    'Price'            => '藏品售价',
+    'Name'             => 'NFT名字',
+    'Title'            => 'NFT简介',
+    'Image'            => 'NFT展示图',
+    'Images'           => 'NFT轮播图',
+    'Price'            => 'NFT售价',
     'Type'             => '拍品类型',
     'Type 1'           => '单品',
     'Type 2'           => '多品组合',

@@ -72,7 +72,7 @@ class Manghe extends Backend
                 ->paginate($limit);
 
             foreach ($list as $row) {
-                $row->visible(['id', 'name', 'title', 'image', 'images', 'price', 'type', 'content', 'order', 'start_time', 'end_time', 'stock', 'sales', 'surplus', 'company_name', 'company_image', 'creator', 'owner', 'casting_name', 'casting_time', 'blockchain', 'contract_address', 'is_show', 'coupon_id', 'label', 'goods_category_id', 'is_manghe', 'is_can_buy', 'is_chip']);
+                $row->visible(['id', 'name', 'title', 'image', 'images', 'price', 'type', 'content', 'order', 'part','start_time', 'end_time', 'stock', 'sales', 'surplus', 'company_name', 'company_image', 'creator', 'owner', 'casting_name', 'casting_time', 'blockchain', 'contract_address', 'is_show', 'coupon_id', 'label', 'goods_category_id', 'is_manghe', 'is_can_buy', 'is_chip']);
 
                 $row->visible(['coupon']);
                 $row->getRelation('coupon')->visible(['name']);
@@ -110,63 +110,6 @@ class Manghe extends Backend
     public function list()
     {
         return json($this->model->where(['is_del' => 0,'is_manghe'=>1])->select());
-    }
-
-    public function zhuzao($ids = "")
-    {
-        $id = $ids;
-        $goodInfo = $this->model->where(['id' => $id])->find();
-        if (!$goodInfo) return "查不到作品信息";
-
-        if ($goodInfo['blockchain']) return "已经铸造过了";
-
-        $haixiaLogic = new HaixiaLogic();
-        $result = $haixiaLogic->productZhuzaoStart($goodInfo);
-
-        if (!empty($result)) {
-            $bo = $this->model->where(['id' => $id])->update($result);
-            if (!$bo) return "更新数据库失败";
-        }
-        if (isset($result['blockchain']) && $result['blockchain']) {
-            return "铸造成功";
-        } else {
-            return "铸造中断，请重新点击铸造";
-        }
-    }
-
-    public function zhuzaoMore($ids = "")
-    {
-        ini_set('max_execution_time', 12000);//秒为单位，自己根据需要定义
-
-        $readGoodInfo = [];
-        $goodInfos = $this->model->where(['id' => ['in', $ids]])->select();
-
-        foreach ($goodInfos as $goodInfo) {
-            if (!$goodInfo['blockchain']) {
-                $readGoodInfo[] = $goodInfo;
-            }
-        }
-
-        if (empty($readGoodInfo)) return json(['code' => 1, 'msg' => "全部铸造成功"]);
-
-        $msgs = [];
-        $haixiaLogic = new HaixiaLogic();
-        foreach ($readGoodInfo as $oneG) {
-            $result = $haixiaLogic->productZhuzaoStart($oneG);
-
-            if (!empty($result)) {
-                $bo = $this->model->where(['id' => $oneG['id']])->update($result);
-                if (!$bo) return json(['code' => 1, 'msg' => "更新数据库失败"]);
-            }
-
-            if (isset($result['blockchain']) && $result['blockchain']) {
-                $msgs[] = "铸造成功";
-            } else {
-                $msgs[] = "铸造中断，请重新点击铸造";
-            }
-        }
-
-        return json(['code' => 1, 'msg' => $msgs]);
     }
 
 

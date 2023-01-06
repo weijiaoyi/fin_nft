@@ -129,7 +129,7 @@ class Order extends BaseController
     }
 
     /**
-     * 会员藏品详情
+     * 会员NFT详情
      * @param $id
      * @return \think\response\Json
      * @throws \think\Exception
@@ -158,7 +158,7 @@ class Order extends BaseController
     }
 
     /**
-     * 藏品列表
+     * NFT列表
      * @param $status
      * @return \think\response\Json
      * @throws \think\db\exception\DataNotFoundException
@@ -171,7 +171,7 @@ class Order extends BaseController
     }
 
     /**
-     * 藏品详情
+     * NFT详情
      * @param $id
      * @return \think\response\Json
      * @throws \think\Exception
@@ -185,7 +185,7 @@ class Order extends BaseController
     }
 
     /**
-     * 藏品出售
+     * NFT出售
      * @param $id
      * @param $price
      * @return \think\response\Json
@@ -199,7 +199,7 @@ class Order extends BaseController
     }
 
     /**
-     * 切换藏品状态
+     * 切换NFT状态
      * @param $id
      * @param $is_show
      * @return \think\response\Json
@@ -240,7 +240,7 @@ class Order extends BaseController
     }
 
     /**
-     * 藏品信息
+     * NFT信息
      * @return \think\response\Json
      * @throws \think\Exception
      */

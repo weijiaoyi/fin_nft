@@ -29,7 +29,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id'), operate: false},
-                        {field: 'users.wallet_address',title:'授权地址', operate: 'LIKE'},
+                        {field: 'user.wallet_address',title:'授权地址', operate: 'LIKE'},
                         {field: 'goodsrank.name', title: '等级', operate: false},
                         {field: 'level', title: '等级', visible:false,searchList:$.getJSON('goods/rank')},
                         {field: 'part', title: '类型 ', searchList: {'0':'成品',"1":'碎片1',"2":'碎片2',"3":'碎片3',"4":'碎片4'}, formatter: Table.api.formatter.status},

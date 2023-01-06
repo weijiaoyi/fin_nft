@@ -11,7 +11,7 @@ use app\common\controller\Backend;
  */
 class GoodsMangheConfig extends Backend
 {
-    
+
     /**
      * GoodsMangheConfig模型对象
      * @var \app\admin\model\GoodsMangheConfig
@@ -37,7 +37,7 @@ class GoodsMangheConfig extends Backend
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
-    
+
 
     /**
      * 查看
@@ -82,7 +82,7 @@ class GoodsMangheConfig extends Backend
             $res = $this->model->where(['goods_id'=>$goods_id, 'combination_goods_id'=>$combination_goods_id])->count();
             if($res)
             {
-                return json(['code'=>0,'msg'=>'此藏品已经添加!']);
+                return json(['code'=>0,'msg'=>'此NFT已经添加!']);
             }
             //检查是否已经设置了未中奖项
             $res1 = $this->model->where(['goods_id'=>$goods_id,'is_win'=>0])->count();

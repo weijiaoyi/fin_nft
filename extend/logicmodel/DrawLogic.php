@@ -147,7 +147,7 @@ class DrawLogic
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function drawcContract($userInfo, $id,$pay_password,$number)
+    public function drawcContract($userInfo, $id,$pay_password)
     {
         $uid = $userInfo['id'];
         if($id==0 || empty($pay_password)){
@@ -169,6 +169,12 @@ class DrawLogic
         $time = date('Y-m-d H:i:s');
         Db::startTrans();
         /**添加合约提现开始**/
+        $web3 = new Web3Logic();
+        $ret = $web3->withdraw($userInfo['bsc_wallet_address'],1);
+        if($ret && $ret['code']!=1){
+            Db::rollback();
+            return Response::fail($ret['msg']);
+        }
         /**添加合约提现结束**/
         //生成拍品信息，生成订单
         $order['goods_users_id'] = $id;

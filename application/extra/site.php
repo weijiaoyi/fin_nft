@@ -7,27 +7,27 @@ return array (
   'version' => '1.0.5',
   'timezone' => 'Asia/Shanghai',
   'forbiddenip' => '',
-  'languages' => 
+  'languages' =>
   array (
     'backend' => 'zh-cn',
     'frontend' => 'zh-cn',
   ),
   'fixedpage' => 'dashboard',
-  'categorytype' => 
+  'categorytype' =>
   array (
     'default' => '默认',
     'page' => '单页',
     'article' => '文章',
     'test' => 'Test',
   ),
-  'configgroup' => 
+  'configgroup' =>
   array (
     'basic' => '基础配置',
     'dictionary' => '字典配置',
     'contents' => '文本协议',
     'follow' => '关注我们',
     'contact' => '联系我们',
-    'goods' => '藏品设置',
+    'goods' => 'NFT设置',
     'compose' => '竞价配置',
   ),
   'mail_type' => '1',
@@ -37,13 +37,13 @@ return array (
   'mail_smtp_pass' => 'dpauixlvnlwqicff',
   'mail_verify_type' => '2',
   'mail_from' => '1129205956@qq.com',
-  'attachmentcategory' => 
+  'attachmentcategory' =>
   array (
     'category1' => '分类一',
     'category2' => '分类二',
     'custom' => '自定义',
   ),
-  'default_image' => 
+  'default_image' =>
   array (
     0 => '/uploads/20220530/205d9d61a87d3172d918bec549d0cc15.png',
   ),

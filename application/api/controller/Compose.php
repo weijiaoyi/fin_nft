@@ -114,7 +114,7 @@ class Compose extends BaseController
             $chipComposeRecordData['goods_id'] = $goodInfo['id'];
             $chipComposeRecordData['compose_num'] = $compose_num;
 
-            //添加到我的藏品中
+            //添加到我的NFT中
             $goodsUsersData = new GoodsUsers();
             $goods_user_number = $goodsUsersData->where(['goods_id'=>$goodInfo['id']])->whereNotNull('number')->order('id', 'desc')->value('number');
             if ($goods_user_number) {
@@ -137,7 +137,7 @@ class Compose extends BaseController
                 $responsData =  Response::fail('碎片合成失败!');
                 return json($responsData);
             }
-            //减少 藏品份额
+            //减少 NFT份额
             $GoodsModel->where(['id' => $goodInfo['id']])->setDec('surplus', 1);
             $GoodsModel->where(['id' => $goodInfo['id']])->setInc('sales', 1);
 

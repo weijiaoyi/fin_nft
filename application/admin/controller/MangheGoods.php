@@ -15,7 +15,7 @@ use think\Model;
  *
  * @icon fa fa-circle-o
  */
-class Goods extends Backend
+class MangheGoods extends Backend
 {
 
     /**
@@ -65,14 +65,14 @@ class Goods extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $list = $this->model
-                ->where(['goods.is_del' => 0,'goods.is_manghe'=>0,'goods.is_manghe_goods'=>0])
+                ->where(['goods.is_del' => 0,'goods.is_manghe_goods'=>1])
                 ->with(['goodsrank'])
                 ->where($where)
                 ->order($sort, $order)
                 ->paginate($limit);
 
             foreach ($list as $row) {
-                $row->visible(['id', 'name', 'title', 'image', 'images', 'price', 'type', 'content', 'order', 'start_time', 'end_time', 'stock', 'sales', 'surplus', 'company_name', 'company_image', 'creator', 'owner', 'casting_name', 'casting_time', 'blockchain', 'contract_address', 'is_show', 'coupon_id', 'label', 'goods_category_id','part', 'is_manghe', 'is_can_buy', 'is_chip']);
+                $row->visible(['id', 'name', 'title', 'image', 'images', 'price', 'type', 'content', 'order', 'start_time', 'end_time', 'stock', 'sales', 'surplus', 'company_name', 'company_image', 'creator', 'owner', 'casting_name', 'casting_time', 'blockchain', 'contract_address', 'is_show', 'coupon_id', 'part', 'goods_category_id', 'is_manghe', 'is_can_buy', 'is_chip']);
                 $row->visible(['goodsrank']);
                 $row->getRelation('goodsrank')->visible(['name']);
 
@@ -93,85 +93,11 @@ class Goods extends Backend
         return json(['code' => 0, 'msg' => '删除失败']);
     }
 
-    public function rank(){
-        $list = \app\admin\model\GoodsRank::all();
-        $rank = collection($list)->toArray();
-        $rank = array_column($rank,'name','id');
-        return json($rank);
-    }
-    public function part(){
-        $part =[
-            ['id'=>0,'name'=>'成品','pid'=>0],
-            ['id'=>1,'name'=>'碎片1','pid'=>0],
-            ['id'=>2,'name'=>'碎片2','pid'=>0],
-            ['id'=>3,'name'=>'碎片3','pid'=>0],
-            ['id'=>4,'name'=>'碎片4','pid'=>0],
-        ];
-        return json(['list'=>$part]);
-    }
 
     public function list()
     {
-        return json($this->model->where(['is_del' => 0,'is_manghe'=>0,'is_manghe_goods'=>0])->select());
+        return json($this->model->where(['is_del' => 0,'is_manghe_goods'=>1])->select());
     }
-
-    public function zhuzao($ids = "")
-    {
-        $id = $ids;
-        $goodInfo = $this->model->where(['id' => $id])->find();
-        if (!$goodInfo) return "查不到作品信息";
-
-        if ($goodInfo['blockchain']) return "已经铸造过了";
-
-        $haixiaLogic = new HaixiaLogic();
-        $result = $haixiaLogic->productZhuzaoStart($goodInfo);
-
-        if (!empty($result)) {
-            $bo = $this->model->where(['id' => $id])->update($result);
-            if (!$bo) return "更新数据库失败";
-        }
-        if (isset($result['blockchain']) && $result['blockchain']) {
-            return "铸造成功";
-        } else {
-            return "铸造中断，请重新点击铸造";
-        }
-    }
-
-    public function zhuzaoMore($ids = "")
-    {
-        ini_set('max_execution_time', 12000);//秒为单位，自己根据需要定义
-
-        $readGoodInfo = [];
-        $goodInfos = $this->model->where(['id' => ['in', $ids]])->select();
-
-        foreach ($goodInfos as $goodInfo) {
-            if (!$goodInfo['blockchain']) {
-                $readGoodInfo[] = $goodInfo;
-            }
-        }
-
-        if (empty($readGoodInfo)) return json(['code' => 1, 'msg' => "全部铸造成功"]);
-
-        $msgs = [];
-        $haixiaLogic = new HaixiaLogic();
-        foreach ($readGoodInfo as $oneG) {
-            $result = $haixiaLogic->productZhuzaoStart($oneG);
-
-            if (!empty($result)) {
-                $bo = $this->model->where(['id' => $oneG['id']])->update($result);
-                if (!$bo) return json(['code' => 1, 'msg' => "更新数据库失败"]);
-            }
-
-            if (isset($result['blockchain']) && $result['blockchain']) {
-                $msgs[] = "铸造成功";
-            } else {
-                $msgs[] = "铸造中断，请重新点击铸造";
-            }
-        }
-
-        return json(['code' => 1, 'msg' => $msgs]);
-    }
-
 
     protected function selectpage()
     {
@@ -249,7 +175,6 @@ class Goods extends Backend
             $this->model->where($this->dataLimitField, 'in', $adminIds);
         }
         $list = [];
-        $manghe['is_manghe'] = 0;
         $manghe['is_manghe_goods'] = 0;
         $total = $this->model->where($where)->where($manghe)->count();
         if ($total > 0) {
@@ -330,6 +255,7 @@ class Goods extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+                    $params['is_manghe_goods']=1;
                     if($params['part']>0){
                         $params['is_chip'] = 1;
                     }

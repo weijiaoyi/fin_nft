@@ -236,10 +236,10 @@ class Manghe extends BaseController
                 $responsData = Response::fail('盲盒抽取失败!');
                 return json($responsData);
             }
-            //如果抽到的是藏品 则做添加处理
+            //如果抽到的是NFT 则做添加处理
             if ($winInfo['is_win']) {
                 $goodsUsersData = new GoodsUsers();
-                //添加到我的藏品中
+                //添加到我的NFT中
                 $goods_user_number = $goodsUsersData->where(['goods_id' => $winInfo['combination_goods_id']])->whereNotNull('number')->order('id', 'desc')->value('number');
                 if ($goods_user_number) {
                     $goods_user_number = str_pad($goods_user_number + 1, 6, '0', STR_PAD_LEFT);
@@ -261,7 +261,7 @@ class Manghe extends BaseController
                     $responsData = Response::fail('盲盒抽取失败!');
                     return json($responsData);
                 }
-                //减少 藏品份额
+                //减少 NFT份额
                 $goodsModel = new Goods();
                 $goodsModel->where(['id' => $winInfo['combination_goods_id']])->setDec('surplus', 1);
                 $goodsModel->where(['id' => $winInfo['combination_goods_id']])->setInc('sales', 1);
