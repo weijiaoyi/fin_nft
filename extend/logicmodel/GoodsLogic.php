@@ -128,8 +128,8 @@ class GoodsLogic
     public function goodsDetail($id)
     {
         $where['g.id'] = $id;
-        $where['g.is_del'] = 0;
-        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.is_chip,gr.image,g.image as image_chip,g.sell_type,g.duration,specify_uid ';
+        //$where['g.is_del'] = 0;
+        $field = 'g.id,g.name,g.level,g.part,g.price,g.start_time,g.end_time,g.is_chip,gr.image,g.image as image_chip,g.sell_type,g.duration,specify_uid,g.sell_type';
         $data = $this->goodsData->alias('g')
             ->join('goods_rank gr', 'g.level = gr.id','LEFT')
             ->where($where)
@@ -145,6 +145,12 @@ class GoodsLogic
             $end_time = date('Y-m-d H:i', strtotime($data['end_time']));
             $data['start_time'] = $start_time;
             $data['end_time'] = $end_time;
+            $bidding_latest_price = 0;
+            if($data['sell_type']==2){
+                $latest_price = Orders::where('goods_id',$data['id'])->order('id','desc')->value('price');
+                $bidding_latest_price = $latest_price ? $latest_price : $data['price'];
+            }
+            $data['bidding_latest_price'] = $bidding_latest_price;
             return Response::success('success', $data);
         }
         return Response::fail('商品信息错误');
@@ -1123,7 +1129,7 @@ class GoodsLogic
             ->where($where)
             ->order(['o.id desc'])
             ->page($page, $pagesize)
-            ->field(['o.price', 'u.nick_name'])
+            ->field(['o.price','o.create_time', 'u.nick_name'])
             ->select();
         return Response::success('success', ['count' => $count, 'data' => $data, 'page' => $page, 'pagesize' => $pagesize]);
     }
