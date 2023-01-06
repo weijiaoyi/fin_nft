@@ -126,7 +126,7 @@ class Buy extends BaseController
     public function mySale($status=-1,$page=1,$pagesize=10){
         $goodsUser =  new GoodsUsers();
         $where=[];
-        if($status!=-1){
+        if($status==-1){
             $where['gu.status'] = ['in',[2,3]];
         }
         if($status==1){
