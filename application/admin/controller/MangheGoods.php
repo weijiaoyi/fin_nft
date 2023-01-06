@@ -175,7 +175,7 @@ class MangheGoods extends Backend
             $this->model->where($this->dataLimitField, 'in', $adminIds);
         }
         $list = [];
-        $manghe['is_manghe_goods'] = 0;
+        $manghe['is_manghe_goods'] = 1;
         $total = $this->model->where($where)->where($manghe)->count();
         if ($total > 0) {
             if (is_array($adminIds)) {
