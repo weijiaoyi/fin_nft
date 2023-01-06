@@ -127,7 +127,13 @@ class Buy extends BaseController
         $goodsUser =  new GoodsUsers();
         $where=[];
         if($status!=-1){
-            $where['gu.status'] = $status==1 ? 2 : 3;
+            $where['gu.status'] = ['in',[2,3]];
+        }
+        if($status==1){
+            $where['gu.status'] = 2;
+        }
+        if($status==2){
+            $where['gu.status'] = 3;
         }
         $where['gu.uid'] = $this->uid;
         $count = $goodsUser->alias('gu')
