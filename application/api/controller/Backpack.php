@@ -131,6 +131,9 @@ class Backpack extends BaseController
             $add['is_chip'] = $goodsUser->is_chip;
             $add['is_del'] = 0;
             $add['is_show'] = 1;
+            $add['stock'] = 1;
+            $add['surplus'] = 1;
+            $add['sales'] = 1;
             $add['is_manghe'] = 0; //非盲盒
             $add['is_can_buy'] = 1; //可以参与购买
             $add['start_time'] = date('Y-m-d H:i:s');

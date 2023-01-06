@@ -193,6 +193,8 @@ class GoodsLogic
         $goods_config_id = 0;
         $time = date('Y-m-d H:i:s');
         $usersGoodsArr = [];
+        Db::startTrans();
+        $goods_users_ids = '';
         for($i=0;$i<$number;$i++) {
             $goods_number = uniqueNum();
             $goods_user_number = $goodsUsersData->where(['goods_id' => $id])->whereNotNull('number')->order('id', 'desc')->value('number');
@@ -211,19 +213,14 @@ class GoodsLogic
             $usersGoods['part'] = $goodsInfo['part'];
             $usersGoods['level'] = $goodsInfo['level'];
             $usersGoodsArr[]=$usersGoods;
+            $goods_users_id = $goodsUsersData->insertGetId($usersGoods);
+            $goods_users_ids.=$goods_users_id.',';
         }
-        Db::startTrans();
-        $goods_users_id = $goodsUsersData->insertAll($usersGoodsArr);
-        if (!$goods_users_id) {
-            Db::rollback();
-            return Response::fail('拍品信息错误');
-        }
-
-
         $goods_manghe_users_id = "";
         //生成拍品信息，生成订单
         $order_num = uniqueNum();
         $order['goods_users_id'] = $goods_users_id;
+        $order['goods_users_ids'] = $goods_users_ids;
         $order['goods_manghe_users_id'] = $goods_manghe_users_id;
         $order['order_num'] = $order_num;
         $order['goods_num'] = $goods_number;
