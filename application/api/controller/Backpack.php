@@ -124,7 +124,7 @@ class Backpack extends BaseController
         if ($goodsUser['part'] != 0) {
             $image = Goods::where(['level' => $goodsUser['level'], 'part' => $goodsUser['part']])->value('image');
         } else {
-            $image = GoodsRank::where(['level' => $goodsUser['level']])->value('image');
+            $image = GoodsRank::where(['id' => $goodsUser['level']])->value('image');
         }
         $add = [];
         $add['goods_user_id'] = $id;
@@ -133,7 +133,6 @@ class Backpack extends BaseController
         $add['specify_uid'] = $sell_type == 3 ? $specify_uid : 0;
         $add['duration'] = $time;
         $add['price'] = $price;
-        $add['stock'] = 1;
         $add['is_chip'] = $goodsUser->is_chip;
         $add['part'] = $goodsUser->part;
         $add['is_del'] = 0;
