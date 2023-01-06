@@ -160,7 +160,7 @@ class DrawLogic
         if($password!=$userInfo['pay_password']){
             return Response::fail('支付密码错误');
         }
-        $goodsUserInfo = $this->goodsUsersData->where(['is_del' => 0, 'is_show' => 1, 'id' => $id])->find();
+        $goodsUserInfo = $this->goodsUsersData->where(['is_del' => 0, 'id' => $id])->find();
         if (empty($goodsUserInfo)) return Response::fail('NFT信息错误');
         if ($goodsUserInfo['status'] !=1) return Response::fail('当前NFT不可提现，未在背包中');
         if ($goodsUserInfo['part'] !=0) return Response::fail('当前为碎片，不可提现');
