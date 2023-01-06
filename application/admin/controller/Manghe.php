@@ -109,7 +109,7 @@ class Manghe extends Backend
 
     public function list()
     {
-        return json($this->model->where(['is_del' => 0,'is_goods_manghe'=>1])->select());
+        return json($this->model->where(['is_del' => 0,'is_manghe_goods'=>1])->select());
     }
 
 
