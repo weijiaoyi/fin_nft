@@ -69,6 +69,7 @@ class GoodsLogic
         if($is_chip!=-1){
             $where['g.is_chip'] = $is_chip;
         }
+        $where['g.surplus'] =['>',0];
         if($is_official==1){
             $where['g.goods_user_id'] = 0;
         }else{
@@ -160,12 +161,12 @@ class GoodsLogic
      * @throws \think\exception\DbException
      * @throws \think\exception\PDOException
      */
-    public function apply($userInfo, $id,$pay_password,$number)
+    public function apply($userInfo, $goods_id,$pay_password,$number)
     {
         $uid = $userInfo['id'];
         //$count = $this->ordersData->where(['buy_uid' => $uid, 'status' => 1])->count();
         //if ($count >= 20) return Response::fail('您的待付款订单已达上限');
-        if($id==0 || empty($pay_password)){
+        if($goods_id==0 || empty($pay_password)){
             return Response::invalidParam();
         }
         $password = md5(md5($pay_password) . $userInfo['pay_salt']);
@@ -175,7 +176,8 @@ class GoodsLogic
         if($password!=$userInfo['pay_password']){
             return Response::fail('支付密码错误');
         }
-        $goodsInfo = $this->goodsData->where(['is_del' => 0, 'is_show' => 1, 'id' => $id])->find();
+        $goodsInfo = $this->goodsData->where(['is_del' => 0, 'is_show' => 1, 'id' => $goods_id])->find();
+
         if (empty($goodsInfo)) return Response::fail('商品信息错误');
         //单品购买  盲盒不用管是否售罄
         if ($goodsInfo['is_manghe'] == 0 && $goodsInfo['surplus'] <= 0) return Response::fail('当前产品已售罄');
@@ -185,19 +187,23 @@ class GoodsLogic
         }else if($goodsInfo['sell_type']==3 && $uid!=$goodsInfo['specify_uid']){//指定人购买
             return Response::fail('您不是指定人，无法购买');
         }
+        Db::startTrans();
         $goodsUsersData = new GoodsUsers();
-        $goodsUser = $goodsUsersData::find($goodsInfo['goods_user_id']);
-        $sale_uid = $goodsUser ? $goodsUser['uid'] : 0;
-        $goods_id = $goodsInfo['id'];
+        $sale_uid = 0;
+        if($goodsInfo['goods_user_id']!=0){
+            $goodsUser = $goodsUsersData::find($goodsInfo['goods_user_id']);
+            $sale_uid = $goodsUser ? $goodsUser['uid'] : 0;
+            $goodsUser->status =3;//已出售
+            $goodsUser->save();
+        }
         $price = $goodsInfo['price'];
         $goods_config_id = 0;
         $time = date('Y-m-d H:i:s');
         $usersGoodsArr = [];
-        Db::startTrans();
         $goods_users_ids = '';
         for($i=0;$i<$number;$i++) {
             $goods_number = uniqueNum();
-            $goods_user_number = $goodsUsersData->where(['goods_id' => $id])->whereNotNull('number')->order('id', 'desc')->value('number');
+            $goods_user_number = $goodsUsersData->where(['goods_id' => $goods_id])->whereNotNull('number')->order('id', 'desc')->value('number');
             if ($goods_user_number) {
                 $goods_user_number = str_pad($goods_user_number + 1, 6, '0', STR_PAD_LEFT);
             } else {
@@ -206,7 +212,7 @@ class GoodsLogic
             $goods['goods_number'] = $goods_number;
             $usersGoods = [];
             $usersGoods['uid'] = $uid;
-            $usersGoods['goods_id'] = $id;
+            $usersGoods['goods_id'] = $goods_id;
             $usersGoods['price'] = $price;
             $usersGoods['create_time'] = $time;
             $usersGoods['number'] = $goods_user_number;
@@ -233,7 +239,7 @@ class GoodsLogic
         $order['create_time'] = $time;
         $order['pay_end_time'] = date('Y-m-d H:i:s', strtotime("+10 minutes"));
         $order['goods_config_id'] = $goods_config_id;
-        $order['buy_goods_id'] = $id;
+        $order['buy_goods_id'] = $goods_id      ;
         $order['number'] = $number;
 
         $order_id = $this->ordersData->insertGetId($order);
@@ -241,8 +247,15 @@ class GoodsLogic
             Db::rollback();
             return Response::fail('订单生成失败');
         }
-        $this->goodsData->where(['id' => $id])->setDec('surplus', 1);
-        $this->goodsData->where(['id' => $id])->setInc('sales', 1);
+        $goodsInfo->surplus--;
+        $goodsInfo->sales++;
+        if($goodsInfo->surplus==0){
+            $goodsInfo->status=3;
+            if($goodsInfo->goods_user_id!=0){
+                $goodsInfo->is_del=1;
+            }
+        }
+        $goodsInfo->save();
         $accountLogic = new AccountLogic();
         $result = $accountLogic->subAccount($uid, 1, $order['price'], 5,'市场购买');
         if (!$result) {
@@ -257,14 +270,11 @@ class GoodsLogic
                 Db::rollback();
                 return Response::fail('市场卖出失败');
             }
-            $result = $goodsUsersData->where(['id' => $goodsInfo['goods_users_id']])->update(['status' => 3]);//已出售
-            if (!$result) {
-                Db::rollback();
-                return Response::fail('订单支付失败');
-            }
         }
         Db::commit();
-        return Response::success('支付成功');
+        $data = $goodsInfo->toArray();
+        $data = addWebSiteUrl($data, ['image']);
+        return Response::success('购买成功',$data);
     }
 
     /**

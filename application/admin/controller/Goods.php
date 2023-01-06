@@ -72,7 +72,7 @@ class Goods extends Backend
                 ->paginate($limit);
 
             foreach ($list as $row) {
-                $row->visible(['id', 'name', 'title', 'image', 'price', 'type', 'content', 'order', 'start_time', 'end_time', 'stock', 'sales', 'surplus', 'company_name', 'company_image', 'creator', 'owner', 'casting_name', 'casting_time', 'blockchain', 'contract_address', 'is_show', 'coupon_id', 'label', 'goods_category_id','part', 'is_manghe', 'is_can_buy', 'is_chip']);
+                $row->visible(['id', 'name', 'title', 'image', 'price', 'type', 'content', 'order', 'start_time', 'end_time', 'stock', 'sales', 'surplus', 'is_show','part', 'is_manghe', 'is_can_buy', 'is_chip']);
                 $row->visible(['goodsrank']);
                 $row->getRelation('goodsrank')->visible(['name']);
 
