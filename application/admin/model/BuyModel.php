@@ -183,9 +183,10 @@ class BuyModel extends Model
         return $this->belongsTo('Users', 'user_id')->setEagerlyType(0);
     }
 
+
     public function contact()
     {
-        return $this->belongsTo('BuyContact', 'id')->setEagerlyType(0);
+        return $this->hasMany('BuyContact', 'id','buy_id');
     }
     public function goodsrank()
     {

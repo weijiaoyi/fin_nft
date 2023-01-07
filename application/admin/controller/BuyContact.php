@@ -2,29 +2,26 @@
 
 namespace app\admin\controller;
 
-use app\admin\model\BuyContact;
 use app\common\controller\Backend;
 
 /**
- *
+ * 商品盲盒购买次数配置
  *
  * @icon fa fa-circle-o
  */
-class Buy extends Backend
+class BuyContact extends Backend
 {
 
     /**
-     * Orders模型对象
-     * @var \app\admin\model\Orders
+     * GoodsMangheConfig模型对象
+     * @var \app\admin\model\GoodsMangheConfig
      */
     protected $model = null;
 
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\BuyModel;
-        $this->view->assign("statusList", $this->model->getStatusList());
-        $this->view->assign("BuyContactList", $this->model->getBuyContactList());
+        $this->model = new \app\admin\model\BuyContact;
     }
 
     public function import()
@@ -44,6 +41,8 @@ class Buy extends Backend
      */
     public function index()
     {
+        $buy_id = input('buy_id');
+        $this->assignconfig('buy_id', $buy_id);
         //当前是否为关联查询
         $this->relationSearch = true;
         //设置过滤方法
@@ -54,36 +53,20 @@ class Buy extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $list = $this->model
-                    ->with(['user','goodsrank'])
-                    ->where($where)
-                    ->order($sort, $order)
-                    ->paginate($limit);
 
-            foreach ($list as $row) {
-                $row->visible(['id','describe','part','level','remark','create_time','status','user_id']);
-				$row->visible(['user']);
-				$row->getRelation('user')->visible(['wallet_address']);
-                $row->visible(['goodsrank']);
-                $row->getRelation('goodsrank')->visible(['name']);
-            }
-            $buycontact = new BuyContact();
-            foreach ($list->items() as &$vo){
-              $vo->remark = $buycontact->alias('b')
-                  ->where('b.buy_id',$vo->id)
-                  ->count();
-            }
+            $list = $this->model
+                ->with(['contact'])
+                ->where('buy_id', $buy_id)
+                ->where($where)
+                ->order($sort, $order)
+                ->paginate($limit);
+
             $result = array("total" => $list->total(), "rows" => $list->items());
+
             return json($result);
         }
         return $this->view->fetch();
     }
 
 
-    public function del($ids = "")
-    {
-        $result = $this->model->where(['id'=>['in',$ids]])->update(['is_del'=>1]);
-        if($result) return json(['code'=>1,'msg'=>'删除成功']);
-        return json(['code'=>0,'msg'=>'删除失败']);
-    }
 }

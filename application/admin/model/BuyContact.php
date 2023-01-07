@@ -16,4 +16,9 @@ class BuyContact extends Model
     {
         return $this->belongsTo('Buy', 'buy_id')->setEagerlyType(0);
     }
+
+    public function contact()
+    {
+        return $this->belongsTo('Contact', 'contact_id')->setEagerlyType(0);
+    }
 }
