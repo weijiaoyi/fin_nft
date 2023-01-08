@@ -27,7 +27,7 @@ class Backpack extends BaseController
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function index($level = -1, $is_chip = -1, $page = 1, $pagesize = 10)
+    public function index($level = -1, $is_chip = -1,$status = -1, $page = 1, $pagesize = 10)
     {
         $goodsUser = new GoodsUsers();
         $where = [];
@@ -38,7 +38,12 @@ class Backpack extends BaseController
             $where['gu.level'] = $level;
         }
         $where['gu.uid'] = $this->uid;
-        $where['gu.status'] = 1;// array('lt',4);
+        if($status==-1){
+            $where['gu.status'] = 1;// array('lt',4);
+        }else{
+           $where['gu.status'] = $status;// array('lt',4);
+        }
+
         $count = $goodsUser->alias('gu')
             ->where($where)
             ->count();
