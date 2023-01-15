@@ -23,6 +23,7 @@ class RechargeRecord extends Model
     protected $append = [
         'status_text',
         'currency_name',
+        'currency_protocol_name',
     ];
 
     public function getStatusList()
@@ -42,6 +43,11 @@ class RechargeRecord extends Model
     public function getCurrencyNameAttr()
     {
         return $this->currency->name ?? __('未知');
+    }
+
+    public function getCurrencyProtocolNameAttr()
+    {
+        return $this->currencyProtocol->protocols_name ?? __('未知');
     }
 
     public function currencyProtocol()

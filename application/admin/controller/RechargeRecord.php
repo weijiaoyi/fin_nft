@@ -6,6 +6,8 @@ use app\common\controller\Backend;
 use logicmodel\AccountLogic;
 use logicmodel\MemberLogic;
 use think\Db;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 use think\Session;
 
 /**
@@ -61,17 +63,14 @@ class RechargeRecord extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $list = $this->model
-                    ->with(['currency','users','currencyProtocol'])
+                    ->with(['users'])
                     ->where($where)
                     ->order($sort, $order)
                     ->paginate($limit);
 
             foreach ($list as $row) {
                 $row->visible(['id','order_num','account','reality_account','type','status','refuse','create_time','address','currency_protocol_id','currency_id']);
-				$row->visible(['currency']);
-				$row->getRelation('currency')->visible(['name']);
-				$row->visible(['currencyProtocol']);
-				$row->getRelation('currencyProtocol')->visible(['protocols_name']);
+
 				$row->visible(['users']);
 				$row->getRelation('users')->visible(['wallet_address']);
             }
@@ -133,4 +132,5 @@ class RechargeRecord extends Backend
         $this->assign('ids',$ids);
         return $this->fetch();
     }
+
 }
