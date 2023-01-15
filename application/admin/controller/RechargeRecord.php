@@ -69,7 +69,7 @@ class RechargeRecord extends Backend
             foreach ($list as $row) {
                 $row->visible(['id','order_num','account','reality_account','type','status','refuse','create_time','address']);
 				$row->visible(['currencyProtocol']);
-				$row->getRelation('currencyProtocol')->visible(['currency_name,chain_protocol_name']);
+				$row->getRelation('currencyProtocol')->visible(['currency_name,currency_protocol_name']);
 				$row->visible(['users']);
 				$row->getRelation('users')->visible(['wallet_address']);
             }

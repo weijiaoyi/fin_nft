@@ -41,8 +41,6 @@ class RechargeLogic
      */
     public function rechargeRecordList($uid, $page, $pagesize){
         $where['rr.uid'] = $uid;
-        $where['rr.status'] = 1;
-
         $count = $this->rechargeRecordData->alias('rr')
             ->join('currency c','c.id = rr.currency_id')
             ->join('currency_protocol cp','cp.id = rr.currency_protocol_id')
@@ -101,6 +99,7 @@ class RechargeLogic
         $data['currency_id'] = $config['currency_id'];
         $data['order_num'] = $order_num;
         $data['account'] = $account;
+        $data['address'] = $config['address'];
         $data['create_time'] = date('Y-m-d H:i:s');
         $data['currency_protocol_id'] = $currency_protocol_id;
         $data['screenshot'] = $screenshot;

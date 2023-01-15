@@ -48,7 +48,7 @@ class RechargeRecord extends Model
         return $this->currency->name ?? __('未知');
     }
 
-    public function currencyProtocol()
+    public function currency_protocol()
     {
         return $this->belongsTo('CurrencyProtocol','currency_protocol_id','id','LEFT')->setEagerlyType(0);
     }
