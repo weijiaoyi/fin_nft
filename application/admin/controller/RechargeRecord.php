@@ -67,9 +67,11 @@ class RechargeRecord extends Backend
                     ->paginate($limit);
 
             foreach ($list as $row) {
-                $row->visible(['id','order_num','account','reality_account','type','status','refuse','create_time','address']);
+                $row->visible(['id','order_num','account','reality_account','type','status','refuse','create_time','address','currency_protocol_id','currency_id']);
+				$row->visible(['currency']);
+				$row->getRelation('currency')->visible(['name']);
 				$row->visible(['currencyProtocol']);
-				$row->getRelation('currencyProtocol')->visible(['currency_name,currency_protocol_name']);
+				$row->getRelation('currencyProtocol')->visible(['protocols_name']);
 				$row->visible(['users']);
 				$row->getRelation('users')->visible(['wallet_address']);
             }

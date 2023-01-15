@@ -8,7 +8,7 @@ class CurrencyProtocol extends Model
 {
     // 追加属性
     protected $append = [
-
+        'chain_protocol_name'
     ];
 
     public function getChainProtocolNameAttr()

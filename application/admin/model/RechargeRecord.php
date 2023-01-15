@@ -22,7 +22,6 @@ class RechargeRecord extends Model
     // 追加属性
     protected $append = [
         'status_text',
-        'currency_protocol_name',
         'currency_name',
     ];
 
@@ -39,16 +38,13 @@ class RechargeRecord extends Model
         return isset($list[$value]) ? $list[$value] : '';
     }
 
-    public function getCurrencyProtocolNameAttr()
-    {
-        return $this->currencyProtocol->name ?? __('未知');
-    }
+
     public function getCurrencyNameAttr()
     {
         return $this->currency->name ?? __('未知');
     }
 
-    public function currency_protocol()
+    public function currencyProtocol()
     {
         return $this->belongsTo('CurrencyProtocol','currency_protocol_id','id','LEFT')->setEagerlyType(0);
     }

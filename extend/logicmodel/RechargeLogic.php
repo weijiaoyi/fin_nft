@@ -47,7 +47,7 @@ class RechargeLogic
             ->where($where)
             ->count();
         if ($count <= 0) return Response::success('暂无数据', ['count' => $count, 'data' => [], 'page' => $page, 'pagesize' => $pagesize]);
-        $field = ['rr.id','rr.account','rr.status','rr.address','expiration','rr.refuse','rr.order_num','rr.create_time','cp.name currency_protocol_name','c.name currency_name'];
+        $field = ['rr.id','rr.account','rr.status','rr.address','expiration','rr.refuse','rr.order_num','rr.create_time','cp.protocols_name','c.name currency_name'];
         $data =  $this->rechargeRecordData->alias('rr')
             ->join('currency c','c.id = rr.currency_id')
             ->join('currency_protocol cp','cp.id = rr.currency_protocol_id')
