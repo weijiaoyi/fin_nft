@@ -38,7 +38,7 @@ class Orders extends Model
 
     public function getPayTypeList()
     {
-        return ['0' => __('Pay_type 0'), '1' => __('Pay_type 1'), '2' => __('Pay_type 2'), '3' => __('Pay_type 3'),'4' => __('Pay_type 4'),'5' => __('Pay_type 5'),'6' => __('Pay_type 6'),'7' => __('Pay_type 7')];
+        return ['0' => __('Pay_type 0'), '1' => __('Pay_type 1')];
     }
 
 

@@ -187,10 +187,10 @@ class Buy extends BaseController
         }
         $data['bidding_price'] = 0;
         if($data['sell_type']==2){
-           // $biddingPrice = Orders::where('goods_id',$data['goods_id'])->order('price','desc')->find();
-           // if($biddingPrice){
-           //     $data['bidding_price'] = $biddingPrice['price'];
-          //  }
+            // $biddingPrice = Orders::where('goods_id',$data['goods_id'])->order('price','desc')->find();
+            // if($biddingPrice){
+            //     $data['bidding_price'] = $biddingPrice['price'];
+            //  }
         }
         return json( Response::success('success',$data));
     }

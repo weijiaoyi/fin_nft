@@ -3,26 +3,27 @@
 namespace app\admin\controller;
 
 use app\common\controller\Backend;
+use fast\Tree;
+use think\Model;
 
 /**
- *
+ * 商品盲盒购买次数配置
  *
  * @icon fa fa-circle-o
  */
-class Currency extends Backend
+class ChainProtocol extends Backend
 {
 
     /**
-     * Currency模型对象
-     * @var \app\admin\model\Currency
+     * GoodsMangheConfig模型对象
+     * @var \app\admin\model\GoodsMangheConfig
      */
     protected $model = null;
 
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\Currency;
-
+        $this->model = new \app\admin\model\ChainProtocol;
     }
 
     public function import()
@@ -43,7 +44,7 @@ class Currency extends Backend
     public function index()
     {
         //当前是否为关联查询
-        $this->relationSearch = false;
+        $this->relationSearch = true;
         //设置过滤方法
         $this->request->filter(['strip_tags', 'trim']);
         if ($this->request->isAjax()) {
@@ -54,24 +55,14 @@ class Currency extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $list = $this->model
-
-                    ->where($where)
-                    ->where('is_show',1)
-                    ->order($sort, $order)
-                    ->paginate($limit);
-
-            foreach ($list as $row) {
-                $row->visible(['id','name','image','status']);
-
-            }
-
+                ->where($where)
+                ->order($sort, $order)
+                ->paginate($limit);
             $result = array("total" => $list->total(), "rows" => $list->items());
 
             return json($result);
         }
         return $this->view->fetch();
     }
-    public function currencyList(){
-        return json($this->model->select());
-    }
+
 }

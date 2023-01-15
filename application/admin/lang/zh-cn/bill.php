@@ -18,6 +18,7 @@ return [
     'Bill_type 9'     => '二级返佣',
     'Bill_type 10'    => '竞价',
     'Bill_type 11'    => '后台调节',
+    'Bill_type 12'    => '提现拒绝',
     'Status 7'     => '竞拍失败',
     'Remark'         => '备注',
     'Type'           => '收支类型',

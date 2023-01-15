@@ -5,24 +5,23 @@ namespace app\admin\controller;
 use app\common\controller\Backend;
 
 /**
- *
+ * 商品盲盒购买次数配置
  *
  * @icon fa fa-circle-o
  */
-class Currency extends Backend
+class CurrencyProtocol extends Backend
 {
 
     /**
-     * Currency模型对象
-     * @var \app\admin\model\Currency
+     * GoodsMangheConfig模型对象
+     * @var \app\admin\model\GoodsMangheConfig
      */
     protected $model = null;
 
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\Currency;
-
+        $this->model = new \app\admin\model\CurrencyProtocol;
     }
 
     public function import()
@@ -42,8 +41,10 @@ class Currency extends Backend
      */
     public function index()
     {
+        $currency_id = input('currency_id');
+        $this->assignconfig('currency_id', $currency_id);
         //当前是否为关联查询
-        $this->relationSearch = false;
+        $this->relationSearch = true;
         //设置过滤方法
         $this->request->filter(['strip_tags', 'trim']);
         if ($this->request->isAjax()) {
@@ -54,16 +55,11 @@ class Currency extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $list = $this->model
-
-                    ->where($where)
-                    ->where('is_show',1)
-                    ->order($sort, $order)
-                    ->paginate($limit);
-
-            foreach ($list as $row) {
-                $row->visible(['id','name','image','status']);
-
-            }
+                ->with(['chainProtocol'])
+                ->where('currency_id', $currency_id)
+                ->where($where)
+                ->order($sort, $order)
+                ->paginate($limit);
 
             $result = array("total" => $list->total(), "rows" => $list->items());
 
@@ -71,7 +67,22 @@ class Currency extends Backend
         }
         return $this->view->fetch();
     }
-    public function currencyList(){
-        return json($this->model->select());
+
+    public function add()
+    {
+        if(request()->isPost()){
+            $currency_id = $this->request->get('currency_id');
+            $post = input('post.');
+            $row = $post['row'];
+            $row['currency_id'] = $currency_id;
+            $result = $this->model->insertGetId($row);
+            if($result > 0)
+            {
+                return json(['code'=>1,'msg'=>'添加成功']);
+            }
+            return json(['code'=>0,'msg'=>'添加失败']);
+        }
+        return $this->fetch();
     }
+
 }

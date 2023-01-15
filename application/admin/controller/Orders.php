@@ -58,6 +58,7 @@ class Orders extends Backend
                     ->where(['orders.is_del'=>0])
                     ->with(['goods','users','busers','goodsuser'])
                     ->where($where)
+                    ->where('orders.order_type','<',5)
                     ->order($sort, $order)
                     ->paginate($limit);
 

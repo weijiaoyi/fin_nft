@@ -28,8 +28,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'id', title: __('Id')},
                         {field: 'name', title: __('Name'), operate: 'LIKE'},
                         {field: 'image', title: __('Image'), operate: false, events: Table.api.events.image, formatter: Table.api.formatter.image},
-                        {field: 'digit', title: __('Digit')},
-                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
+                        {field: 'status', title: '状态', searchList: {"0":'隐藏',"1":'显示'}, formatter: Table.api.formatter.normal},
+                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
+                                buttons: [
+                                {
+                                    dropdown:'充值地址',
+                                    name: '充值地址',
+                                    text: '充值地址',
+                                    title: '充值地址',
+                                    classname: 'btn  btn-success btn-dialog',
+                                    url: function (row) {
+                                        return 'currency_protocol/index?currency_id='+row.id;
+                                    },
+                                    visible:function(row){
+                                        return true; //或者return false
+                                    },
+                                    callback: function (data) {
+                                        $(".btn-refresh").trigger("click");
+                                    }
+                                }
+                            ]
+                        }
                     ]
                 ]
             });

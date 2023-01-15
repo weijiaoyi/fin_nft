@@ -8,13 +8,13 @@ use think\Model;
 class Currency extends Model
 {
 
-    
 
-    
+
+
 
     // 表名
     protected $name = 'currency';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
 
@@ -27,11 +27,12 @@ class Currency extends Model
     protected $append = [
 
     ];
-    
-
-    
 
 
+    public function currencyProtocol()
+    {
+        return $this->hasMany('CurrencyProtocol', 'currency_id','id')->where('is_open',1);
+    }
 
 
 

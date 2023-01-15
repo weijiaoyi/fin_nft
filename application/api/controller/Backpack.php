@@ -32,7 +32,7 @@ class Backpack extends BaseController
         $goodsUser = new GoodsUsers();
         $where = [];
         if ($is_chip != -1) {
-            $where['gu.is_chip'] = $is_chip;
+            $where['gu.part'] = $is_chip==0  ? 0 : ['gt',0];
         }
         if ($level != -1) {
             $where['gu.level'] = $level;
@@ -41,9 +41,8 @@ class Backpack extends BaseController
         if($status==-1){
             $where['gu.status'] = 1;// array('lt',4);
         }else{
-           $where['gu.status'] = $status;// array('lt',4);
+            $where['gu.status'] = $status;// array('lt',4);
         }
-
         $count = $goodsUser->alias('gu')
             ->where($where)
             ->count();
@@ -61,7 +60,8 @@ class Backpack extends BaseController
             $data = collection($data)->toArray();
             $data = addWebSiteUrl($data, ['image', 'chip_image']);
             foreach ($data as &$vo) {
-                $vo['image'] = $vo['is_chip'] == 1 ? $vo['chip_image'] : $vo['image'];
+                $vo['image'] = $vo['part'] !=0 ? $vo['chip_image'] : $vo['image'];
+                $vo['is_chip'] = $vo['part'] !=0 ? 1 : 0;
                 unset($vo['chip_image']);
             }
         }
@@ -95,6 +95,7 @@ class Backpack extends BaseController
             $data = $data->toArray();
             $data = addWebSiteUrl($data, ['image', 'chip_image']);
         }
+        $data['is_chip'] = $data['part'] !=0 ? 1 : 0;
         return json(Response::success('success', $data));
     }
 
@@ -196,7 +197,7 @@ class Backpack extends BaseController
                     ->join('goods g', 'gu.goods_id = g.id', 'LEFT')
                     ->where('gu.level', $vo['id'])
                     ->where('gu.uid', $this->uid)
-                    ->where('gu.is_chip', 1)
+                    //->where('gu.is_chip', 1)
                     ->where('gu.part', $i)
                     ->where('gu.status', 1)
                     ->count();
@@ -230,10 +231,10 @@ class Backpack extends BaseController
         $arr = [];
         for ($i = 1; $i < 5; $i++) {
             $num = $goodsUser->alias('gu')
-                ->join('goods g', 'gu.goods_id = g.id', 'LEFT')
+                //->join('goods g', 'gu.goods_id = g.id', 'LEFT')
                 ->where('gu.level', $level)
                 ->where('gu.uid', $this->uid)
-                ->where('gu.is_chip', 1)
+                //->where('gu.is_chip', 1)
                 ->where('gu.part', $i)
                 ->where('gu.status', 1)
                 ->count();
@@ -241,11 +242,11 @@ class Backpack extends BaseController
         }
         $goods = Goods::where('level', $level)->where('part', 0)->where('goods_user_id', 0)->find();
         if ($number > min($arr)) {
-            return json(Response::fail('碎片不足'));
+            return json(Response::fail('碎片不足'.min($arr)));
         }
         Db::startTrans();
         for ($i = 1; $i < 5; $i++) {
-            $goodsUser->where('status', 1)->where('level', $level)->where('part', $i)->limit($number)->save(['status' => 4]);
+            $goodsUser->where('status', 1)->where('uid', $this->uid)->where('level', $level)->where('part', $i)->limit($number)->update(['status' => 4]);
         }
         $adds = [];
         for ($i = 0; $i < $number; $i++) {
@@ -268,11 +269,13 @@ class Backpack extends BaseController
             $usersGoods['level'] = $level;
             $usersGoods['number'] = $goods_user_number;
             $usersGoods['source'] = 2;
-            $adds[] = $add;
+            $adds[] = $usersGoods;
         }
         $goodsUser->insertAll($adds);
         Db::commit();
-        return json(Response::success('合成成功'));
+        $goods = collection($goods->toArray());
+        $goods = addWebSiteUrl($goods, ['image']);
+        return json(Response::success('合成成功',['data'=>$goods]));
     }
 
     /**

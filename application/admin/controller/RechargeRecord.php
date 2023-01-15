@@ -13,7 +13,7 @@ use think\Session;
  *
  * @icon fa fa-circle-o
  */
-class DrawRecord extends Backend
+class RechargeRecord extends Backend
 {
 
     /**
@@ -25,8 +25,7 @@ class DrawRecord extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\DrawRecord;
-        $this->view->assign("typeList", $this->model->getTypeList());
+        $this->model = new \app\admin\model\RechargeRecord;
         $this->view->assign("statusList", $this->model->getStatusList());
     }
 
@@ -62,28 +61,19 @@ class DrawRecord extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $list = $this->model
-                    ->with(['currency','users'])
+                    ->with(['currency','users','currencyProtocol'])
                     ->where($where)
                     ->order($sort, $order)
                     ->paginate($limit);
 
             foreach ($list as $row) {
-                $row->visible(['id','order_num','account','reality_account','type','status','refuse','create_time','bank_name','bank_number','bank_owner','bank_branch','ali_name','ali_number','ali_image','wx_name','wx_number','wx_image']);
-                $row->visible(['currency']);
-				$row->getRelation('currency')->visible(['name']);
+                $row->visible(['id','order_num','account','reality_account','type','status','refuse','create_time','address']);
+				$row->visible(['currencyProtocol']);
+				$row->getRelation('currencyProtocol')->visible(['currency_name,chain_protocol_name']);
 				$row->visible(['users']);
 				$row->getRelation('users')->visible(['wallet_address']);
             }
-            $account = $this->model
-                ->with(['currency','users'])
-                ->where($where)
-                ->sum('draw_record.account');
-            $reality_account = $this->model
-                ->with(['currency','users'])
-                ->where($where)
-                ->sum('draw_record.reality_account');
-            $fee_account = bcsub($account,$reality_account,2);
-            $result = array("total" => $list->total(), "rows" => $list->items(),'account'=>$account,'reality_account'=>$reality_account,'fee_account'=>$fee_account);
+            $result = array("total" => $list->total(), "rows" => $list->items());
 
             return json($result);
         }
@@ -98,9 +88,21 @@ class DrawRecord extends Backend
      */
     public function pass($ids){
         $info = $this->model->find($ids);
-        if(empty($info)) return json(['code'=>0,'msg'=>'提现信息错误']);
-        if($info['status'] != 0 )return json(['code'=>0,'msg'=>'当前提现已审核']);
-        $result = $this->model->where(['id'=>$ids])->update(['status'=>1]);
+        if(empty($info)) return json(['code'=>0,'msg'=>'充值信息错误']);
+        if($info['status'] != 0 )return json(['code'=>0,'msg'=>'当前充值已审核']);
+
+        Db::startTrans();
+        $result = $this->model->where(['id'=>$ids])->update(['status'=>2]);
+        if($result <= 0){
+            Db::rollback();
+            $this->error('操作失败');
+        }
+        $result = (new AccountLogic())->addAccount($info['uid'],$info['currency_id'],$info['account'],1,'充值成功');
+        if($result){
+            Db::commit();
+            $this->success('操作成功');
+        }
+        Db::rollback();
         if($result) return json(['code'=>1,'msg'=>'审核成功']);
         return json(['code'=>0,'msg'=>'审核失败']);
     }
@@ -118,21 +120,13 @@ class DrawRecord extends Backend
         if(request()->post()){
             $info = $this->model->where(['id'=>$ids])->find();
             if(empty($info)) return json(['code'=>0,'msg'=>'申请信息错误']);
-            if(!in_array($info['status'],[0,3]))      $this->error('记录状态错误');
+            if($info['status'] != 0 )return json(['code'=>0,'msg'=>'当前充值已审核']);
             $refuse = input('post.refuse');
-            Db::startTrans();
-            $result = $this->model->where(['id'=>$ids])->update(['refuse'=>$refuse,'status'=>2]);
+            $result = $this->model->where(['id'=>$ids])->update(['refuse'=>$refuse,'status'=>3]);
             if($result <= 0){
-                Db::rollback();
                 $this->error('操作失败');
             }
-            $result = (new AccountLogic())->addAccount($info['uid'],$info['currency_id'],$info['account'],12,'提现拒绝');
-            if($result){
-                Db::commit();
-                $this->success('操作成功');
-            }
-            Db::rollback();
-            $this->error('操作失败');
+            $this->success('操作成功');
         }
         $this->assign('ids',$ids);
         return $this->fetch();

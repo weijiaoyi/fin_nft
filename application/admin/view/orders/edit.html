@@ -28,7 +28,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Status')}:</label>
         <div class="col-xs-12 col-sm-8">
-            
+
             <div class="radio">
             {foreach name="statusList" item="vo"}
             <label for="row[status]-{$key}"><input id="row[status]-{$key}" disabled name="row[status]" type="radio" value="{$key}" {in name="key" value="$row.status"}checked{/in} /> {$vo}</label>
@@ -40,7 +40,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Pay_type')}:</label>
         <div class="col-xs-12 col-sm-8">
-                        
+
             <select  id="c-pay_type" class="form-control selectpicker" name="row[pay_type]">
                 {foreach name="payTypeList" item="vo"}
                     <option value="{$key}" {in name="key" disabled value="$row.pay_type"}selected{/in}>{$vo}</option>

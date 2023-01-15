@@ -36,7 +36,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'account', title: __('Account'), operate: false},
                         // {field: 'before_account', title: __('Before_account'), operate: false},
                         // {field: 'after_account', title: __('After_account'), operate: false},
-                        {field: 'bill_type', title: __('Bill_type'),searchList: {"1":__('Bill_type 1'),"2":__('Bill_type 2'),"3":__('Bill_type 3'),"4":__('Bill_type 4'),"5":__('Bill_type 5'),"6":__('Bill_type 6'),"7":__('Bill_type 7'),"8":__('Bill_type 8'),"9":__('Bill_type 9'),"10":__('Bill_type 10'),"11":__('Bill_type 11')}},
+                        {field: 'bill_type', title: __('Bill_type'),searchList: {"1":__('Bill_type 1'),"2":__('Bill_type 2'),"3":__('Bill_type 3'),"4":__('Bill_type 4'),"5":__('Bill_type 5'),"6":__('Bill_type 6'),"7":__('Bill_type 7'),"8":__('Bill_type 8'),"9":__('Bill_type 9'),"10":__('Bill_type 10'),"11":__('Bill_type 11'),"12":__('Bill_type 12')}},
                         {field: 'remark', title: __('Remark'), operate: false},
                         {field: 'type', title: __('Type'), searchList: {"1":__('Type 1'),"2":__('Type 2')}, formatter: Table.api.formatter.normal},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', autocomplete:false},

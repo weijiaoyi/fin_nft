@@ -2,5 +2,5 @@ location / {
      index  index.html index.htm index.php;
      if (!-e $request_filename) {
          rewrite ^/(.*)$ /index.php/$1 last; 
-    }
+     }
 }
