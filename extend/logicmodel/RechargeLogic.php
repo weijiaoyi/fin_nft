@@ -42,22 +42,30 @@ class RechargeLogic
     public function rechargeRecordList($uid, $page, $pagesize){
         $where['rr.uid'] = $uid;
         $count = $this->rechargeRecordData->alias('rr')
-            ->join('currency c','c.id = rr.currency_id')
-            ->join('currency_protocol cp','cp.id = rr.currency_protocol_id')
             ->where($where)
             ->count();
         if ($count <= 0) return Response::success('暂无数据', ['count' => $count, 'data' => [], 'page' => $page, 'pagesize' => $pagesize]);
-        $field = ['rr.id','rr.account','rr.status','rr.address','expiration','rr.refuse','rr.order_num','rr.create_time','cp.protocols_name','c.name currency_name'];
         $data =  $this->rechargeRecordData->alias('rr')
-            ->join('currency c','c.id = rr.currency_id')
-            ->join('currency_protocol cp','cp.id = rr.currency_protocol_id')
             ->where($where)
             ->order(['rr.id desc'])
-            ->field($field)
             ->page($page, $pagesize)
             ->select();
       if($data) return Response::success('success',collection($data)->toArray());
       return   Response::success('暂无数据',[]);
+    }
+
+    public function rechargeRecordDetails($uid,$id){
+        $where['rr.uid'] = $uid;
+        $where['rr.id'] = $id;
+        $data =  $this->rechargeRecordData->alias('rr')
+            ->where($where)
+            ->find();
+        if($data) {
+            $data = $data->toArray();
+            $data = addWebSiteUrl($data,['screenshot']);
+            $data['remaining_time'] = $data['status'] ==0 ? $data['expiration']-time() : 0;
+        }
+        return Response::success('success',$data);
     }
 
     /**

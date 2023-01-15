@@ -75,4 +75,8 @@ class Recharge extends BaseController
         return json($this->rechargeLogic->rechargeRecordList($this->uid,$page,$pagesize));
     }
 
+   public function rechargeRecordDetails($id=0){
+        return json($this->rechargeLogic->rechargeRecordDetails($this->uid,$id));
+    }
+
 }
